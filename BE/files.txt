@@ -1,0 +1,24 @@
+agburu-backend/
+├── src/
+│   ├── config/
+│   │   ├── db.js              # MongoDB Connection
+│   │   └── cloudinary.js      # Cloudinary Config
+│   ├── controllers/
+│   │   ├── authController.js   # Admin Login & Auth checks
+│   │   └── personController.js # CRUD, Pagination, Search, Soft-delete
+│   ├── middleware/
+│   │   ├── authMiddleware.js   # JWT Protection
+│   │   └── uploadMiddleware.js # Multer memory storage configuration
+│   ├── models/
+│   │   ├── Admin.js           # Admin User Model
+│   │   └── Person.js          # Lineage Member Model (Mongoose)
+│   ├── routes/
+│   │   ├── authRoutes.js      # /api/auth
+│   │   └── personRoutes.js    # /api/people
+│   ├── utils/
+│   │   └── cloudinaryUpload.js# Buffer to Cloudinary Uploader
+│   ├── app.js                 # Express App setup
+│   └── server.js              # Server entry point
+├── .env                       # Secrets & Environment vars
+├── package.json
+└── README.md

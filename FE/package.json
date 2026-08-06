@@ -1,0 +1,23 @@
+{
+  "name": "agburu",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@vue-flow/core": "^1.33.0",
+    "@vueform/multiselect": "^2.6.0",
+    "compressorjs": "^1.2.1",
+    "dagre": "^0.8.5",
+    "vue": "^3.4.21",
+    "vue-router": "^4.3.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.4",
+    "vite": "^5.4.21"
+  }
+}
