@@ -6,7 +6,10 @@
         <p>Interactive Lineage Visualization & Historical Record Tree</p>
       </div>
       <div class="header-navigation">
-        <button @click="$router.push({ name: 'admin-dashboard' })" class="dashboard-shortcut-btn">
+        <button
+          @click="$router.push({ name: 'admin-dashboard' })"
+          class="dashboard-shortcut-btn"
+        >
           🔒 Admin Control Room
         </button>
       </div>
@@ -28,10 +31,11 @@
         :fit-view-on-init="true"
         :default-edge-options="{ type: 'smoothstep' }"
         @node-click="handleNodeClick"
+        position="bottom"
       >
         <template #node-custom="nodeProps">
-          <CustomNode 
-            v-bind="nodeProps" 
+          <CustomNode
+            v-bind="nodeProps"
             @show-info="openBiographyModal"
             @expand="handleExpandBranch"
             @collapse="handleCollapseBranch"
@@ -40,30 +44,38 @@
       </VueFlow>
     </div>
 
-    <BaseModal 
-      v-if="showModal" 
-      :active-person="selectedPerson" 
-      @close="closeBiographyModal" 
+    <BaseModal
+      v-if="showModal"
+      :active-person="selectedPerson"
+      @close="closeBiographyModal"
     />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, markRaw } from 'vue';
-import { VueFlow } from '@vue-flow/core';
-import { useLineage } from '@/composables/useLineage';
-import { api } from '@/api';
+import { ref, onMounted, markRaw } from "vue";
+import { VueFlow } from "@vue-flow/core";
+import { useLineage } from "@/composables/useLineage";
+import { api } from "@/api";
 
 // Component layout child templates
-import CustomNode from '@/components/canvas/CustomNode.vue';
-import BaseModal from '@/components/ui/BaseModal.vue';
+import CustomNode from "@/components/canvas/CustomNode.vue";
+import BaseModal from "@/components/ui/BaseModal.vue";
 
 // Register the custom node design directly with Vue Flow structural interpreter
 const nodeTypes = {
-  custom: markRaw(CustomNode)
+  custom: markRaw(CustomNode),
 };
 
-const { nodes, edges, isLoading, error, loadInitialTree, expandChildBranch, collapseChildBranch } = useLineage();
+const {
+  nodes,
+  edges,
+  isLoading,
+  error,
+  loadInitialTree,
+  expandChildBranch,
+  collapseChildBranch,
+} = useLineage();
 
 // Modal Overlay Visibility Hooks
 const showModal = ref(false);
@@ -82,7 +94,8 @@ const bootstrapLineageTree = async () => {
     if (rootPerson && rootPerson.id) {
       await loadInitialTree(rootPerson.id);
     } else {
-      error.value = "No active lineage records discovered. Please access the Admin dashboard to add members.";
+      error.value =
+        "No active lineage records discovered. Please access the Admin dashboard to add members.";
     }
   } catch (err) {
     error.value = "API connection failed: " + err.message;
@@ -115,8 +128,8 @@ const handleNodeClick = (event) => {
 </script>
 
 <style>
-@import '@vue-flow/core/dist/style.css';
-@import '@vue-flow/core/dist/theme-default.css';
+@import "@vue-flow/core/dist/style.css";
+@import "@vue-flow/core/dist/theme-default.css";
 
 .canvas-viewport-wrapper {
   position: relative;
@@ -141,11 +154,20 @@ const handleNodeClick = (event) => {
   justify-content: space-between;
   align-items: center;
   z-index: 100;
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
-.brand-block h1 { margin: 0; font-size: 1.25rem; color: #0f172a; font-weight: 700; }
-.brand-block p { margin: 0.15rem 0 0 0; font-size: 0.8rem; color: #64748b; }
+.brand-block h1 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #0f172a;
+  font-weight: 700;
+}
+.brand-block p {
+  margin: 0.15rem 0 0 0;
+  font-size: 0.8rem;
+  color: #64748b;
+}
 
 .dashboard-shortcut-btn {
   background-color: #0f172a;
@@ -157,7 +179,9 @@ const handleNodeClick = (event) => {
   font-weight: 500;
   cursor: pointer;
 }
-.dashboard-shortcut-btn:hover { background-color: #1e293b; }
+.dashboard-shortcut-btn:hover {
+  background-color: #1e293b;
+}
 
 .vue-flow-container-box {
   width: 100%;
@@ -175,7 +199,10 @@ const handleNodeClick = (event) => {
   align-items: center;
   gap: 1rem;
 }
-.canvas-status-overlay.error-theme { color: #dc2626; font-weight: 500; }
+.canvas-status-overlay.error-theme {
+  color: #dc2626;
+  font-weight: 500;
+}
 
 .spinner {
   width: 40px;
@@ -185,7 +212,11 @@ const handleNodeClick = (event) => {
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 .vue-flow__edge-path {
   stroke: #cbd5e1 !important;
