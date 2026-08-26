@@ -1,7 +1,7 @@
 <template>
   <div class="form-container">
     <div class="header-actions">
-      <h2>{{ isEditMode ? 'Edit Lineage Member' : 'Add New Lineage Member' }}</h2>
+      <h2>{{ isEditMode ? 'Edit Person Profile' : 'Add New Person' }}</h2>
       <button @click="$router.push({ name: 'admin-dashboard' })" class="back-btn">← Back to Dashboard</button>
     </div>
 
@@ -9,7 +9,7 @@
       <!-- SECTION A: Identity & Demographics -->
       <div class="form-section">
         <h3>Section A: Demographic Identity</h3>
-        
+
         <div class="form-grid">
           <div class="form-group">
             <label>Academic/Civil Title</label>
@@ -43,15 +43,6 @@
           </div>
 
           <div class="form-group">
-            <label>Mode of Joining *</label>
-            <div class="radio-group">
-              <label><input type="radio" v-model="form.modeOfJoining" value="birthed" required /> Birthed</label>
-              <label><input type="radio" v-model="form.modeOfJoining" value="married" required /> Married</label>
-              <label><input type="radio" v-model="form.modeOfJoining" value="adopted" required /> Adopted</label>
-            </div>
-          </div>
-
-          <div class="form-group">
             <label>Birth Date</label>
             <input type="date" v-model="form.birthDate" />
           </div>
@@ -81,82 +72,12 @@
         </div>
       </div>
 
-      <!-- SECTION B: Relational Linkage -->
-      <div class="form-section">
-        <h3>Section B: Relational Linkage</h3>
-        <p class="section-desc">Search for existing database profiles to build relations.</p>
-
-        <div class="form-group">
-          <label>Parent Connection (Search by name)</label>
-          <input 
-            type="text" 
-            v-model="parentSearch" 
-            @input="searchPeople('parent')" 
-            placeholder="Type to search structural parent..."
-          />
-          <div v-if="parentResults.length" class="search-dropdown">
-            <div 
-              v-for="p in parentResults" 
-              :key="p.id" 
-              @click="selectParent(p)" 
-              class="search-item"
-            >
-              {{ p.title }} {{ p.name }} ({{ p.gender }})
-            </div>
-          </div>
-          <div v-if="selectedParentName" class="selected-badge">
-            Linked Parent: <strong>{{ selectedParentName }}</strong> 
-            <span @click="clearParent" class="clear-x">✕</span>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Partners/Wives (Search to append)</label>
-          <input 
-            type="text" 
-            v-model="partnerSearch" 
-            @input="searchPeople('partner')" 
-            placeholder="Type to add a partner..."
-          />
-          <div v-if="partnerResults.length" class="search-dropdown">
-            <div v-for="p in partnerResults" :key="p.id" @click="addPartner(p)" class="search-item">
-              {{ p.name }}
-            </div>
-          </div>
-          <div class="badges-container">
-            <div v-for="(name, id) in selectedPartnersMap" :key="id" class="selected-badge">
-              {{ name }} <span @click="removePartner(id)" class="clear-x">✕</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Direct Children (Search to append)</label>
-          <input 
-            type="text" 
-            v-model="childSearch" 
-            @input="searchPeople('child')" 
-            placeholder="Type to add a child..."
-          />
-          <div v-if="childResults.length" class="search-dropdown">
-            <div v-for="c in childResults" :key="c.id" @click="addChild(c)" class="search-item">
-              {{ c.name }}
-            </div>
-          </div>
-          <div class="badges-container">
-            <div v-for="(name, id) in selectedChildrenMap" :key="id" class="selected-badge">
-              {{ name }} <span @click="removeChild(id)" class="clear-x">✕</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <MilestoneInput v-model="form.milestones" />
 
       <div class="actions-row">
         <div v-if="uiError" class="error-banner">{{ uiError }}</div>
         <button type="submit" class="submit-btn" :disabled="isSaving">
-          {{ isSaving ? 'Processing Records...' : isEditMode ? 'Update Record' : 'Save Member Document' }}
+          {{ isSaving ? 'Processing Records...' : isEditMode ? 'Update Person Profile' : 'Create Person and Choose Lineage' }}
         </button>
       </div>
     </form>
@@ -182,15 +103,11 @@ const form = reactive({
   titledName: '',
   name: '',
   gender: 'male',
-  modeOfJoining: 'birthed',
   birthDate: '',
   deathDate: '',
   biographySummary: '',
   detailedBiography: '',
   profilePicture: '',
-  parentId: '',
-  partnerIds: [],
-  childrenIds: [],
   milestones: [],
   isDeleted: false
 });
@@ -198,21 +115,6 @@ const form = reactive({
 // File Management
 const rawFile = ref(null);
 const imagePreview = ref(null);
-
-// Search Layer UI States
-const parentSearch = ref('');
-const parentResults = ref([]);
-const selectedParentName = ref('');
-
-const partnerSearch = ref('');
-const partnerResults = ref([]);
-const selectedPartnersMap = reactive({});
-
-const childSearch = ref('');
-const childResults = ref([]);
-const selectedChildrenMap = reactive({});
-
-let searchTimeout = null;
 
 onMounted(async () => {
   if (route.params.id) {
@@ -228,89 +130,10 @@ const loadMemberData = async (id) => {
     if (data) {
       Object.assign(form, data);
       imagePreview.value = form.profilePicture;
-      
-      // Resolve names for linked parent badge
-      if (form.parentId) {
-        const parentData = await api.getPersonById(form.parentId);
-        if (parentData) selectedParentName.value = parentData.name;
-      }
-      
-      // Resolve names for partners
-      if (form.partnerIds && form.partnerIds.length) {
-        const partners = await api.getPeopleByIds(form.partnerIds);
-        partners.forEach(p => { selectedPartnersMap[p.id] = p.name; });
-      }
-
-      // Resolve names for children
-      if (form.childrenIds && form.childrenIds.length) {
-        const children = await api.getPeopleByIds(form.childrenIds);
-        children.forEach(c => { selectedChildrenMap[c.id] = c.name; });
-      }
     }
   } catch (err) {
     uiError.value = "Failed to pull profile configurations: " + err.message;
   }
-};
-
-// Search people using Node REST Endpoint
-const searchPeople = (type) => {
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(async () => {
-    const queryText = type === 'parent' ? parentSearch.value : type === 'partner' ? partnerSearch.value : childSearch.value;
-    if (!queryText || queryText.trim().length < 2) return;
-
-    try {
-      const res = await api.getPeople(`search=${encodeURIComponent(queryText.trim())}&limit=5`);
-      const list = res.people || [];
-
-      if (type === 'parent') parentResults.value = list;
-      else if (type === 'partner') partnerResults.value = list;
-      else if (type === 'child') childResults.value = list;
-    } catch (err) {
-      console.error("Lookup query failed", err);
-    }
-  }, 300);
-};
-
-// Relation Pick and Clear Bindings
-const selectParent = (person) => {
-  form.parentId = person.id;
-  selectedParentName.value = person.name;
-  parentResults.value = [];
-  parentSearch.value = '';
-};
-
-const clearParent = () => {
-  form.parentId = '';
-  selectedParentName.value = '';
-};
-
-const addPartner = (person) => {
-  if (!form.partnerIds.includes(person.id)) {
-    form.partnerIds.push(person.id);
-    selectedPartnersMap[person.id] = person.name;
-  }
-  partnerResults.value = [];
-  partnerSearch.value = '';
-};
-
-const removePartner = (id) => {
-  form.partnerIds = form.partnerIds.filter(pId => pId !== id);
-  delete selectedPartnersMap[id];
-};
-
-const addChild = (person) => {
-  if (!form.childrenIds.includes(person.id)) {
-    form.childrenIds.push(person.id);
-    selectedChildrenMap[person.id] = person.name;
-  }
-  childResults.value = [];
-  childSearch.value = '';
-};
-
-const removeChild = (id) => {
-  form.childrenIds = form.childrenIds.filter(cId => cId !== id);
-  delete selectedChildrenMap[id];
 };
 
 // Handle Image Picker & Show Preview
@@ -336,7 +159,9 @@ const handleSubmit = async () => {
     if (isEditMode.value) {
       await api.updatePerson(route.params.id, formData);
     } else {
-      await api.createPerson(formData);
+      const person = await api.createPerson(formData);
+      router.push({ name: 'admin-lineages', query: { personId: person.id, personName: person.name } });
+      return;
     }
 
     router.push({ name: 'admin-dashboard' });
@@ -504,4 +329,35 @@ input[type="text"], input[type="date"], select, textarea {
   font-size: 0.9rem;
 }
 .mt-4 { margin-top: 1rem; }
+
+[data-theme="dark"] .back-btn {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+[data-theme="dark"] .form-section {
+  background: var(--surface);
+  border-color: var(--border);
+}
+[data-theme="dark"] h3 { color: var(--text); }
+[data-theme="dark"] label { color: var(--text-muted); }
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] input[type="date"],
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background: var(--surface-muted);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+[data-theme="dark"] .pic-upload-group img {
+  border-color: var(--border);
+}
+
+@media (max-width: 700px) {
+  .header-actions { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .form-section { padding: 1.25rem; }
+  .form-grid { grid-template-columns: 1fr; }
+  .col-span-2 { grid-column: span 1; }
+  .actions-row { align-items: stretch; }
+  .submit-btn { width: 100%; }
+}
 </style>

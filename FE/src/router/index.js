@@ -4,6 +4,10 @@ import ProfileView from '@/views/ProfileView.vue';
 import LoginView from '@/views/LoginView.vue';
 import Dashboard from '@/views/admin/Dashboard.vue';
 import MemberForm from '@/views/admin/MemberForm.vue';
+import LineageCreateView from '@/views/LineageCreateView.vue';
+import LineagesView from '@/views/admin/LineagesView.vue';
+import EditorsView from '@/views/admin/EditorsView.vue';
+import LineageMapView from '@/views/LineageMapView.vue';
 
 const routes = [
   {
@@ -40,6 +44,29 @@ const routes = [
     component: MemberForm,
     props: true,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/admin/editors',
+    name: 'admin-editors',
+    component: EditorsView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/admin/lineages',
+    name: 'admin-lineages',
+    component: LineagesView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/create-lineage',
+    name: 'create-lineage',
+    component: LineageCreateView
+  },
+  {
+    path: '/:slug',
+    name: 'lineage',
+    component: LineageMapView,
+    props: true
   }
 ];
 

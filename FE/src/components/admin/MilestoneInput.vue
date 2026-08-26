@@ -3,31 +3,31 @@
     <h3>Historical Milestones & Timelines</h3>
     <p class="description">Add key life achievements, titles, or events chronologically.</p>
 
-    <div 
-      v-for="(milestone, index) in milestones" 
-      :key="index" 
+    <div
+      v-for="(milestone, index) in milestones"
+      :key="index"
       class="milestone-row"
     >
       <div class="input-group date-input">
-        <input 
-          type="date" 
-          v-model="milestone.date" 
-          required 
+        <input
+          type="date"
+          v-model="milestone.date"
+          required
         />
       </div>
 
       <div class="input-group text-input">
-        <input 
-          type="text" 
-          v-model="milestone.description" 
-          placeholder="e.g., Conferred with the traditional titled name..." 
-          required 
+        <input
+          type="text"
+          v-model="milestone.description"
+          placeholder="e.g., Conferred with the traditional titled name..."
+          required
         />
       </div>
 
-      <button 
-        type="button" 
-        class="delete-btn" 
+      <button
+        type="button"
+        class="delete-btn"
         @click="removeRow(index)"
         title="Delete Milestone"
       >
@@ -35,9 +35,9 @@
       </button>
     </div>
 
-    <button 
-      type="button" 
-      class="add-btn" 
+    <button
+      type="button"
+      class="add-btn"
       @click="addRow"
     >
       + Add Milestone Row
@@ -119,5 +119,25 @@ h3 {
 }
 .add-btn:hover {
   background: #eff6ff;
+}
+
+[data-theme="dark"] .milestones-section {
+  background-color: var(--surface-muted);
+  border-color: var(--border);
+}
+[data-theme="dark"] h3 { color: var(--text); }
+[data-theme="dark"] .description { color: var(--text-muted); }
+[data-theme="dark"] .input-group input {
+  background: var(--surface);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+[data-theme="dark"] .add-btn {
+  background: var(--surface);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+[data-theme="dark"] .add-btn:hover {
+  background: var(--accent-soft);
 }
 </style>

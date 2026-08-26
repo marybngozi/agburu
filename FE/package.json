@@ -12,6 +12,7 @@
     "@vue-flow/core": "^1.33.0",
     "@vueform/multiselect": "^2.6.0",
     "compressorjs": "^1.2.1",
+    "d3-hierarchy": "^3.1.2",
     "dagre": "^0.8.5",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0"

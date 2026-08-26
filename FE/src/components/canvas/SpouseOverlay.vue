@@ -2,23 +2,21 @@
   <div class="spouses-overlay-container">
     <div v-if="isLoading" class="spouse-loading">Loading list...</div>
     <div v-else-if="partners.length === 0" class="spouse-empty">No records found.</div>
-    
-    <div 
-      v-else 
-      v-for="partner in partners" 
-      :key="partner.id" 
-      class="spouse-mini-card"
-    >
-      <img 
-        :src="partner.profilePicture || 'https://placehold.co/100x100?text=No+Photo'" 
-        alt="Spouse avatar" 
-        class="mini-avatar"
-      />
-      <div class="mini-details">
-        <span v-if="partner.titledName" class="native-title">{{ partner.titledName }}</span>
-        <span class="partner-name">{{ partner.name }}</span>
+
+    <article v-else v-for="partner in partners" :key="partner.id" class="spouse-mini-card">
+      <div class="spouse-identity">
+        <img
+          :src="partner.profilePicture || 'https://placehold.co/100x100?text=No+Photo'"
+          alt="Spouse avatar"
+          class="mini-avatar"
+        />
+        <div class="mini-details">
+          <span v-if="partner.titledName" class="native-title">{{ partner.titledName }}</span>
+          <span class="partner-name">{{ partner.name }}</span>
+        </div>
       </div>
-    </div>
+      <button type="button" class="spouse-info-btn" @click="$emit('show-info', partner)">ℹ️ Info</button>
+    </article>
   </div>
 </template>
 
@@ -33,6 +31,8 @@ const props = defineProps({
     default: () => []
   }
 });
+
+defineEmits(['show-info']);
 
 const partners = ref([]);
 const isLoading = ref(false);
@@ -68,12 +68,14 @@ onMounted(async () => {
 .spouse-mini-card {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.5rem;
-  background: #f9fafb;
-  padding: 0.35rem;
-  border-radius: 4px;
-  border: 1px solid #f3f4f6;
+  background: #fff;
+  padding: 0.55rem;
+  border-radius: 6px;
+  border: 1px solid #fbcfe8;
 }
+.spouse-identity { display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
 .mini-avatar {
   width: 28px;
   height: 28px;
@@ -98,5 +100,15 @@ onMounted(async () => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.spouse-info-btn { border: 0; border-radius: 4px; padding: 0.28rem 0.4rem; background: #fdf2f8; color: #9d174d; cursor: pointer; font-size: 0.7rem; font-weight: 600; }
+.spouse-info-btn:hover { background: #fce7f3; }
+
+[data-theme="dark"] .spouse-mini-card {
+  background: var(--surface);
+  border-color: #831843;
+}
+[data-theme="dark"] .partner-name {
+  color: var(--text);
 }
 </style>

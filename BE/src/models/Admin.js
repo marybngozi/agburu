@@ -2,8 +2,13 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 const adminSchema = new mongoose.Schema({
+  username: { type: String, trim: true, sparse: true, unique: true },
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-  password: { type: String, required: true }
+  password: { type: String, required: true },
+  role: { type: String, enum: ['platform_admin', 'profile_editor'], default: 'platform_admin', index: true },
+  assignedPersonId: { type: mongoose.Schema.Types.ObjectId, ref: 'Person', default: null, index: true },
+  isApproved: { type: Boolean, default: true, index: true },
+  isActive: { type: Boolean, default: true, index: true }
 }, { timestamps: true });
 
 // Async pre-save middleware in Mongoose does not use next()

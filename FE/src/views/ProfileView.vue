@@ -5,6 +5,7 @@
       <div v-if="person" class="nav-breadcrumbs">
         Directory / Profile Workspace / <strong>{{ person.name }}</strong>
       </div>
+      <ThemeToggle />
     </nav>
 
     <div v-if="isLoading" class="loading-workspace-state">
@@ -15,9 +16,9 @@
     <div v-else-if="person" class="profile-split-workspace">
       <aside class="biographical-dossier-panel">
         <div class="dossier-identity-card">
-          <img 
-            :src="person.profilePicture || 'https://placehold.co/150x150?text=No+Photo'" 
-            alt="Profile Picture" 
+          <img
+            :src="person.profilePicture || 'https://placehold.co/150x150?text=No+Photo'"
+            alt="Profile Picture"
             class="dossier-avatar"
           />
           <div class="identity-meta">
@@ -27,7 +28,7 @@
             </div>
             <h2>{{ person.name }}</h2>
             <p class="lifespan-span">
-              ⏳ {{ formatYear(person.birthDate) }} — 
+              ⏳ {{ formatYear(person.birthDate) }} —
               {{ person.deathDate ? formatYear(person.deathDate) : 'Present (Alive)' }}
             </p>
           </div>
@@ -57,16 +58,16 @@
             <h3>Focused Family Tree Stream</h3>
             <p>Tracing lineage relationships branching dynamically directly from this member node.</p>
           </div>
-          
+
           <div class="traversal-toggle-switch">
-            <button 
-              :class="{ 'active-mode': canvasMode === 'descendants' }" 
+            <button
+              :class="{ 'active-mode': canvasMode === 'descendants' }"
               @click="switchCanvasOrientation('descendants')"
             >
               Descendants (Forward Tree)
             </button>
-            <button 
-              :class="{ 'active-mode': canvasMode === 'ancestors' }" 
+            <button
+              :class="{ 'active-mode': canvasMode === 'ancestors' }"
               @click="switchCanvasOrientation('ancestors')"
             >
               Ancestors (Backward Tree)
@@ -79,15 +80,25 @@
             v-model:nodes="nodes"
             v-model:edges="edges"
             :node-types="nodeTypes"
+            :edge-types="edgeTypes"
             :fit-view-on-init="true"
           >
             <template #node-custom="nodeProps">
-              <CustomNode 
-                v-bind="nodeProps" 
+              <CustomNode
+                v-bind="nodeProps"
                 @show-info="hotReloadWorkspaceId"
                 @expand="handleExpandBranch"
                 @collapse="handleCollapseBranch"
               />
+            </template>
+            <template #node-seeMore="nodeProps">
+              <SeeMoreNode
+                v-bind="nodeProps"
+                @show-remaining-children="handleShowRemainingChildren"
+              />
+            </template>
+            <template #edge-branch="edgeProps">
+              <BranchEdge v-bind="edgeProps" />
             </template>
           </VueFlow>
         </div>
@@ -105,6 +116,9 @@ import { useLineage } from '@/composables/useLineage';
 
 import TimeLine from '@/components/ui/TimeLine.vue';
 import CustomNode from '@/components/canvas/CustomNode.vue';
+import SeeMoreNode from '@/components/canvas/SeeMoreNode.vue';
+import BranchEdge from '@/components/canvas/BranchEdge.vue';
+import ThemeToggle from '@/components/ui/ThemeToggle.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -113,9 +127,10 @@ const person = ref(null);
 const isLoading = ref(true);
 const canvasMode = ref('descendants');
 
-const nodeTypes = { custom: markRaw(CustomNode) };
+const nodeTypes = { custom: markRaw(CustomNode), seeMore: markRaw(SeeMoreNode) };
+const edgeTypes = { branch: markRaw(BranchEdge) };
 
-const { nodes, edges, loadInitialTree, expandChildBranch, collapseChildBranch } = useLineage();
+const { nodes, edges, loadInitialTree, expandChildBranch, collapseChildBranch, revealHiddenChildren } = useLineage();
 
 onMounted(async () => {
   await loadWorkspaceProfile(route.params.id);
@@ -180,7 +195,7 @@ const traceAncestorsLineageTree = async () => {
           id: `e-${pData.id}-${targetChildId}`,
           source: pData.id,
           target: targetChildId,
-          type: 'smoothstep'
+          type: 'branch'
         });
         targetChildId = pData.id;
         currentParentId = pData.parentId;
@@ -193,12 +208,17 @@ const traceAncestorsLineageTree = async () => {
     }
   }
 
-  nodes.value = localNodes; 
+  nodes.value = localNodes;
   edges.value = localEdges;
 };
 
 const handleExpandBranch = async (args) => await expandChildBranch(args.id, args.childrenIds);
 const handleCollapseBranch = (id) => collapseChildBranch(id);
+const handleShowRemainingChildren = async (parentId) => {
+  const marker = nodes.value.find((node) => node.id === `more-${parentId}`);
+  if (!marker) return;
+  await revealHiddenChildren(parentId, marker.data.hiddenIds);
+};
 
 const hotReloadWorkspaceId = (personProps) => {
   router.push({ name: 'profile', params: { id: personProps.id } });
@@ -237,7 +257,7 @@ const formatYear = (dateStr) => dateStr ? new Date(dateStr).getFullYear() : '???
   color: #334155;
 }
 .nav-back-anchor:hover { background-color: #f8fafc; }
-.nav-breadcrumbs { font-size: 0.85rem; color: #64748b; }
+.nav-breadcrumbs { font-size: 0.85rem; color: #64748b; flex: 1; }
 
 .profile-split-workspace {
   flex: 1;
@@ -313,4 +333,63 @@ const formatYear = (dateStr) => dateStr ? new Date(dateStr).getFullYear() : '???
 .loading-workspace-state { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 1rem; color: #64748b; }
 .spinner { width: 35px; height: 35px; border: 3px solid #cbd5e1; border-top-color: #2563eb; border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 860px) {
+  .profile-page-viewport { height: auto; min-height: 100vh; overflow: visible; }
+  .profile-top-navigation { flex-wrap: wrap; gap: 0.75rem; padding: 0.75rem 1rem; }
+  .nav-breadcrumbs { flex-basis: 100%; order: 3; }
+  .profile-split-workspace { flex-direction: column; overflow: visible; }
+  .biographical-dossier-panel {
+    width: 100%;
+    max-height: 45vh;
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1.25rem 1rem;
+  }
+  .focused-lineage-canvas-viewport { min-height: 60vh; }
+  .canvas-panel-header { flex-direction: column; align-items: stretch; gap: 0.75rem; }
+  .traversal-toggle-switch { justify-content: center; }
+}
+
+[data-theme="dark"] .biographical-dossier-panel { border-bottom-color: var(--border); }
+
+[data-theme="dark"] .profile-page-viewport { background-color: var(--bg); }
+[data-theme="dark"] .profile-top-navigation {
+  background: var(--surface);
+  border-bottom-color: var(--border);
+}
+[data-theme="dark"] .nav-back-anchor {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+[data-theme="dark"] .nav-back-anchor:hover { background-color: var(--surface-hover); }
+[data-theme="dark"] .nav-breadcrumbs { color: var(--text-muted); }
+[data-theme="dark"] .biographical-dossier-panel {
+  background: var(--surface);
+  border-right-color: var(--border);
+}
+[data-theme="dark"] .identity-meta h2 { color: var(--text); }
+[data-theme="dark"] .lifespan-span { color: var(--text-muted); }
+[data-theme="dark"] .biographical-prose-block h3,
+[data-theme="dark"] .historical-timeline-container h3 { color: var(--text); }
+[data-theme="dark"] .prose-paragraph { color: var(--text-muted); }
+[data-theme="dark"] .generic-fallback { color: var(--text-subtle); }
+[data-theme="dark"] .panel-section-divider { background-color: var(--border); }
+[data-theme="dark"] .focused-lineage-canvas-viewport { background: var(--bg); }
+[data-theme="dark"] .canvas-panel-header {
+  background: var(--surface);
+  border-bottom-color: var(--border);
+}
+[data-theme="dark"] .canvas-headline h3 { color: var(--text); }
+[data-theme="dark"] .canvas-headline p { color: var(--text-muted); }
+[data-theme="dark"] .traversal-toggle-switch {
+  background: var(--surface-muted);
+  border-color: var(--border);
+}
+[data-theme="dark"] .traversal-toggle-switch button { color: var(--text-muted); }
+[data-theme="dark"] .traversal-toggle-switch button.active-mode {
+  background: var(--surface);
+  color: var(--accent-strong);
+}
+[data-theme="dark"] .loading-workspace-state { color: var(--text-muted); }
 </style>

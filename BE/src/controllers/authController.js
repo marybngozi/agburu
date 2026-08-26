@@ -10,9 +10,15 @@ export const loginAdmin = async (req, res) => {
   try {
     const admin = await Admin.findOne({ email });
     if (admin && (await admin.matchPassword(password))) {
+      if (!admin.isActive || !admin.isApproved) {
+        return res.status(403).json({ message: 'This account is awaiting approval or has been disabled' });
+      }
       res.json({
         id: admin._id,
         email: admin.email,
+        username: admin.username,
+        role: admin.role,
+        assignedPersonId: admin.assignedPersonId,
         token: generateToken(admin._id)
       });
     } else {

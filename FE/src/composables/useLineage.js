@@ -11,6 +11,9 @@ export function useLineage() {
   // 1. Configure Dagre dimensions to match your CustomNode size (width: 260px, height: ~120px)
   const NODE_WIDTH = 260;
   const NODE_HEIGHT = 120;
+  // Same cap as the public lineage map, so no generation ever floods the
+  // canvas — the rest surface behind a "see more" node instead.
+  const MAX_VISIBLE_CHILDREN = 8;
 
   const graphLayout = new dagre.graphlib.Graph();
 
@@ -62,7 +65,9 @@ export function useLineage() {
       const localEdges = [];
 
       if (rootData.childrenIds?.length) {
-        const children = await api.getPeopleByIds(rootData.childrenIds);
+        const visibleIds = rootData.childrenIds.slice(0, MAX_VISIBLE_CHILDREN);
+        const hiddenIds = rootData.childrenIds.slice(MAX_VISIBLE_CHILDREN);
+        const children = await api.getPeopleByIds(visibleIds);
         children.forEach((child) => {
           localNodes.push({
             id: child.id,
@@ -73,9 +78,23 @@ export function useLineage() {
             id: `e-${rootData.id}-${child.id}`,
             source: rootData.id,
             target: child.id,
-            type: "smoothstep",
+            type: "branch",
           });
         });
+        if (hiddenIds.length) {
+          localNodes.push({
+            id: `more-${rootData.id}`,
+            type: "seeMore",
+            data: { parentId: rootData.id, hiddenCount: hiddenIds.length, hiddenIds },
+          });
+          localEdges.push({
+            id: `more-edge-${rootData.id}`,
+            source: rootData.id,
+            target: `more-${rootData.id}`,
+            type: "branch",
+            class: "more-edge",
+          });
+        }
         localNodes[0].data.isExpanded = true;
         localNodes[0].data.hasLoadedChildren = true;
       }
@@ -87,6 +106,24 @@ export function useLineage() {
     } finally {
       isLoading.value = false;
     }
+  };
+
+  const loadLineageTree = (people, relationships) => {
+    const localNodes = people.map((person) => ({
+      id: person.id,
+      type: 'custom',
+      data: { ...person, isExpanded: true, hasLoadedChildren: true },
+    }));
+    const localEdges = relationships
+      .filter((relationship) => relationship.type === 'parent_child')
+      .map((relationship) => ({
+        id: relationship.id,
+        source: relationship.parentPersonId,
+        target: relationship.childPersonId,
+        type: 'branch',
+      }));
+    edges.value = localEdges;
+    nodes.value = calculateLayout(localNodes, localEdges);
   };
 
   const expandChildBranch = async (parentNodeId, childrenIds) => {
@@ -111,7 +148,7 @@ export function useLineage() {
             id: `e-${parentNodeId}-${child.id}`,
             source: parentNodeId,
             target: child.id,
-            type: "smoothstep",
+            type: "branch",
           });
         }
       });
@@ -123,6 +160,17 @@ export function useLineage() {
     } finally {
       isLoading.value = false;
     }
+  };
+
+  // Swaps a "see more" marker for its real children, reusing the same
+  // fetch-and-place logic expandChildBranch already does.
+  const revealHiddenChildren = async (parentNodeId, hiddenIds) => {
+    await expandChildBranch(parentNodeId, hiddenIds);
+    const markerId = `more-${parentNodeId}`;
+    const nextNodes = nodes.value.filter((node) => node.id !== markerId);
+    const nextEdges = edges.value.filter((edge) => edge.id !== `more-edge-${parentNodeId}`);
+    edges.value = nextEdges;
+    nodes.value = calculateLayout(nextNodes, nextEdges);
   };
 
   const collapseChildBranch = (parentNodeId) => {
@@ -159,7 +207,9 @@ export function useLineage() {
     isLoading,
     error,
     loadInitialTree,
+    loadLineageTree,
     expandChildBranch,
     collapseChildBranch,
+    revealHiddenChildren,
   };
 }

@@ -4,10 +4,27 @@
     <div class="dashboard-header">
       <div class="title-block">
         <h2>Agburu Lineage Directory</h2>
-        <p>Manage family tree records, connections, and historical timelines.</p>
+        <p>
+          Manage family tree records, connections, and historical timelines.
+        </p>
       </div>
       <div class="header-buttons">
-        <button @click="goToAddMember" class="add-member-btn">+ Add New Member</button>
+        <ThemeToggle />
+        <button
+          @click="$router.push({ name: 'admin-lineages' })"
+          class="logout-btn"
+        >
+          Manage Lineages
+        </button>
+        <button
+          @click="$router.push({ name: 'admin-editors' })"
+          class="logout-btn"
+        >
+          Profile Editors
+        </button>
+        <button @click="goToAddMember" class="add-member-btn">
+          + Add New Person
+        </button>
         <button @click="handleLogout" class="logout-btn">Sign Out</button>
       </div>
     </div>
@@ -15,16 +32,20 @@
     <!-- Filters & Search Panel -->
     <div class="filter-panel">
       <div class="search-box">
-        <input 
-          type="text" 
-          v-model="searchQuery" 
-          @input="debounceSearch" 
+        <input
+          type="text"
+          v-model="searchQuery"
+          @input="debounceSearch"
           placeholder="Search members by name (e.g., Chidi)..."
         />
       </div>
       <div class="toggle-box">
         <label>
-          <input type="checkbox" v-model="showDeleted" @change="fetchMembers(1)" />
+          <input
+            type="checkbox"
+            v-model="showDeleted"
+            @change="fetchMembers(1)"
+          />
           Show Archived/Deleted Records
         </label>
       </div>
@@ -46,24 +67,40 @@
         </thead>
         <tbody>
           <tr v-if="isLoading">
-            <td colspan="7" class="state-cell">Loading records from directory...</td>
+            <td colspan="7" class="state-cell">
+              Loading records from directory...
+            </td>
           </tr>
           <tr v-else-if="members.length === 0">
-            <td colspan="7" class="state-cell">No family tree records found.</td>
+            <td colspan="7" class="state-cell">
+              No family tree records found.
+            </td>
           </tr>
-          
-          <tr v-else v-for="member in members" :key="member.id" :class="{ 'archived-row': member.isDeleted }">
+
+          <tr
+            v-else
+            v-for="member in members"
+            :key="member.id"
+            :class="{ 'archived-row': member.isDeleted }"
+          >
             <td>
-              <img 
-                :src="member.profilePicture || 'https://placehold.co/100x100?text=No+Photo'" 
-                alt="Avatar" 
+              <img
+                :src="
+                  member.profilePicture ||
+                  'https://placehold.co/100x100?text=No+Photo'
+                "
+                alt="Avatar"
                 class="table-avatar"
               />
             </td>
             <td>
               <div class="title-tags">
-                <span v-if="member.title" class="badge-civil">{{ member.title }}</span>
-                <span v-if="member.titledName" class="badge-native">{{ member.titledName }}</span>
+                <span v-if="member.title" class="badge-civil">{{
+                  member.title
+                }}</span>
+                <span v-if="member.titledName" class="badge-native">{{
+                  member.titledName
+                }}</span>
                 <span v-if="!member.title && !member.titledName">—</span>
               </div>
             </td>
@@ -71,23 +108,27 @@
             <td class="capitalize-text">{{ member.gender }}</td>
             <td class="capitalize-text">{{ member.modeOfJoining }}</td>
             <td>
-              <span :class="member.isDeleted ? 'status-deleted' : 'status-active'">
-                {{ member.isDeleted ? 'Archived' : 'Active' }}
+              <span
+                :class="member.isDeleted ? 'status-deleted' : 'status-active'"
+              >
+                {{ member.isDeleted ? "Archived" : "Active" }}
               </span>
             </td>
             <td class="actions-cell">
-              <button @click="editMember(member.id)" class="edit-btn">Edit</button>
-              
-              <button 
-                v-if="!member.isDeleted" 
-                @click="toggleDeleteStatus(member.id, true)" 
+              <button @click="editMember(member.id)" class="edit-btn">
+                Edit
+              </button>
+
+              <button
+                v-if="!member.isDeleted"
+                @click="toggleDeleteStatus(member.id, true)"
                 class="delete-btn"
               >
                 Delete
               </button>
-              <button 
-                v-else 
-                @click="toggleDeleteStatus(member.id, false)" 
+              <button
+                v-else
+                @click="toggleDeleteStatus(member.id, false)"
                 class="restore-btn"
               >
                 Restore
@@ -100,16 +141,18 @@
 
     <!-- Standard Numeric Pagination Controls -->
     <div class="pagination-row">
-      <button 
-        @click="navigatePage(currentPage - 1)" 
+      <button
+        @click="navigatePage(currentPage - 1)"
         :disabled="currentPage <= 1 || isLoading"
         class="nav-btn"
       >
         ← Previous Page
       </button>
-      <span class="page-indicator">Page {{ currentPage }} of {{ totalPages || 1 }}</span>
-      <button 
-        @click="navigatePage(currentPage + 1)" 
+      <span class="page-indicator"
+        >Page {{ currentPage }} of {{ totalPages || 1 }}</span
+      >
+      <button
+        @click="navigatePage(currentPage + 1)"
         :disabled="currentPage >= totalPages || isLoading"
         class="nav-btn"
       >
@@ -120,10 +163,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { api } from '@/api';
-import { useAuth } from '@/composables/useAuth';
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { api } from "@/api";
+import { useAuth } from "@/composables/useAuth";
+import ThemeToggle from "@/components/ui/ThemeToggle.vue";
 
 const router = useRouter();
 const { logout } = useAuth();
@@ -131,7 +175,7 @@ const { logout } = useAuth();
 // Core UI States
 const members = ref([]);
 const isLoading = ref(false);
-const searchQuery = ref('');
+const searchQuery = ref("");
 const showDeleted = ref(false);
 
 // Pagination States
@@ -155,11 +199,11 @@ const fetchMembers = async (page = 1) => {
       page: page.toString(),
       limit: PAGE_LIMIT.toString(),
       search: searchQuery.value.trim(),
-      showDeleted: showDeleted.value ? 'true' : 'false'
+      showDeleted: showDeleted.value ? "true" : "false",
     });
 
     const res = await api.getPeople(queryParams.toString());
-    
+
     members.value = res.people || [];
     totalPages.value = res.pages || 1;
   } catch (err) {
@@ -174,7 +218,7 @@ const debounceSearch = () => {
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(() => {
     fetchMembers(1);
-  }, 400);
+  }, 600);
 };
 
 // Pagination Handler
@@ -186,7 +230,7 @@ const navigatePage = (page) => {
 
 // Soft Delete / Restore Execution via Node Backend API
 const toggleDeleteStatus = async (id, statusToggleValue) => {
-  const confirmationMessage = statusToggleValue 
+  const confirmationMessage = statusToggleValue
     ? "Are you sure you want to delete this record? This action soft-deletes the profile but preserves references."
     : "Restore this record back into active tree queries?";
 
@@ -202,7 +246,7 @@ const toggleDeleteStatus = async (id, statusToggleValue) => {
 };
 
 // Routing Actions
-const goToAddMember = () => router.push({ name: 'add-member' });
+const goToAddMember = () => router.push({ name: "add-member" });
 const editMember = (id) => router.push({ path: `/admin/edit-member/${id}` });
 const handleLogout = async () => await logout();
 </script>
@@ -220,11 +264,38 @@ const handleLogout = async () => await logout();
   align-items: center;
   margin-bottom: 2rem;
 }
-.title-block h2 { margin: 0 0 0.25rem 0; color: #111827; font-size: 1.75rem; }
-.title-block p { margin: 0; color: #6b7280; font-size: 0.95rem; }
-.header-buttons { display: flex; gap: 0.75rem; }
-.add-member-btn { background-color: #2563eb; color: white; border: none; padding: 0.625rem 1.25rem; border-radius: 6px; font-weight: 500; cursor: pointer; }
-.logout-btn { background-color: white; border: 1px solid #d1d5db; color: #374151; padding: 0.625rem 1.25rem; border-radius: 6px; cursor: pointer; }
+.title-block h2 {
+  margin: 0 0 0.25rem 0;
+  color: #111827;
+  font-size: 1.75rem;
+}
+.title-block p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+.header-buttons {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+.add-member-btn {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 0.625rem 1.25rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.logout-btn {
+  background-color: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  padding: 0.625rem 1.25rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
 
 .filter-panel {
   display: flex;
@@ -236,35 +307,218 @@ const handleLogout = async () => await logout();
   border: 1px solid #e5e7eb;
   margin-bottom: 1.5rem;
 }
-.search-box input { width: 320px; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 4px; }
-.toggle-box label { font-size: 0.875rem; color: #4b5563; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+.search-box input {
+  width: 320px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+}
+.toggle-box label {
+  font-size: 0.875rem;
+  color: #4b5563;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
 
-.table-wrapper { background: white; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-.directory-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
-.directory-table th { background: #f3f4f6; color: #374151; padding: 0.875rem 1rem; font-weight: 600; border-bottom: 1px solid #e5e7eb; }
-.directory-table td { padding: 0.875rem 1rem; border-bottom: 1px solid #f3f4f6; color: #4b5563; }
-.archived-row { background-color: #fef2f2; }
+.table-wrapper {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+.directory-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+.directory-table th {
+  background: #f3f4f6;
+  color: #374151;
+  padding: 0.875rem 1rem;
+  font-weight: 600;
+  border-bottom: 1px solid #e5e7eb;
+}
+.directory-table td {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid #f3f4f6;
+  color: #4b5563;
+}
+.archived-row {
+  background-color: #fef2f2;
+}
 
-.table-avatar { width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 1px solid #e5e7eb; }
-.title-tags { display: flex; gap: 0.25rem; }
-.badge-civil { background: #e0f2fe; color: #0369a1; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.75rem; font-weight: 500; }
-.badge-native { background: #fef3c7; color: #b45309; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.75rem; font-weight: 500; }
+.table-avatar {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid #e5e7eb;
+}
+.title-tags {
+  display: flex;
+  gap: 0.25rem;
+}
+.badge-civil {
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.badge-native {
+  background: #fef3c7;
+  color: #b45309;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
 
-.status-active { background: #dcfce7; color: #15803d; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 500; }
-.status-deleted { background: #fee2e2; color: #b91c1c; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 500; }
+.status-active {
+  background: #dcfce7;
+  color: #15803d;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.status-deleted {
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
 
-.actions-head { text-align: right; }
-.actions-cell { display: flex; gap: 0.5rem; justify-content: flex-end; }
-.actions-cell button { border: none; padding: 0.35rem 0.75rem; border-radius: 4px; cursor: pointer; font-size: 0.825rem; font-weight: 500; }
-.edit-btn { background: #eff6ff; color: #1d4ed8; }
-.delete-btn { background: #fee2e2; color: #b91c1c; }
-.restore-btn { background: #ecfdf5; color: #047857; }
+.actions-head {
+  text-align: right;
+}
+.actions-cell {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+.actions-cell button {
+  border: none;
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.825rem;
+  font-weight: 500;
+}
+.edit-btn {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+.delete-btn {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.restore-btn {
+  background: #ecfdf5;
+  color: #047857;
+}
 
-.pagination-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; }
-.nav-btn { background: white; border: 1px solid #d1d5db; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
-.nav-btn:disabled { color: #9ca3af; cursor: not-allowed; background: #f9fafb; }
-.page-indicator { font-size: 0.85rem; color: #6b7280; }
-.font-medium { font-weight: 500; color: #111827 !important; }
-.capitalize-text { text-transform: capitalize; }
-.state-cell { text-align: center; padding: 3rem !important; color: #9ca3af; font-style: italic; }
+.pagination-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+.nav-btn {
+  background: white;
+  border: 1px solid #d1d5db;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.nav-btn:disabled {
+  color: #9ca3af;
+  cursor: not-allowed;
+  background: #f9fafb;
+}
+.page-indicator {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+.font-medium {
+  font-weight: 500;
+  color: #111827 !important;
+}
+.capitalize-text {
+  text-transform: capitalize;
+}
+.state-cell {
+  text-align: center;
+  padding: 3rem !important;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+[data-theme="dark"] .title-block h2 { color: var(--text); }
+[data-theme="dark"] .title-block p { color: var(--text-muted); }
+[data-theme="dark"] .logout-btn {
+  background-color: var(--surface);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+[data-theme="dark"] .filter-panel {
+  background: var(--surface-muted);
+  border-color: var(--border);
+}
+[data-theme="dark"] .search-box input {
+  background: var(--surface);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+[data-theme="dark"] .toggle-box label { color: var(--text-muted); }
+[data-theme="dark"] .table-wrapper {
+  background: var(--surface);
+  border-color: var(--border);
+}
+[data-theme="dark"] .directory-table th {
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  border-bottom-color: var(--border);
+}
+[data-theme="dark"] .directory-table td {
+  border-bottom-color: var(--border);
+  color: var(--text-muted);
+}
+[data-theme="dark"] .archived-row {
+  background-color: rgba(248, 113, 113, 0.08);
+}
+[data-theme="dark"] .table-avatar {
+  border-color: var(--border);
+}
+[data-theme="dark"] .nav-btn {
+  background: var(--surface);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+[data-theme="dark"] .nav-btn:disabled {
+  color: var(--text-subtle);
+  background: var(--surface-muted);
+}
+[data-theme="dark"] .page-indicator { color: var(--text-muted); }
+[data-theme="dark"] .font-medium { color: var(--text) !important; }
+[data-theme="dark"] .state-cell { color: var(--text-subtle); }
+
+@media (max-width: 800px) {
+  .dashboard-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .header-buttons { flex-wrap: wrap; width: 100%; }
+  .header-buttons button { flex: 1 1 auto; }
+  .filter-panel { flex-direction: column; align-items: stretch; gap: 0.75rem; }
+  .search-box input { width: 100%; box-sizing: border-box; }
+  .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .directory-table { min-width: 720px; }
+  .pagination-row { flex-wrap: wrap; gap: 0.75rem; justify-content: center; }
+}
 </style>

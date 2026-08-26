@@ -1,4 +1,9 @@
-const API_BASE = "http://localhost:3010/api";
+// Vite only inlines env vars prefixed VITE_ into the client bundle, and only
+// reads them at build time — so the deployed frontend needs VITE_API_BASE
+// set in its hosting platform's build-time env vars (e.g. Cloudflare Pages),
+// pointing at the deployed backend's URL. Falls back to the local Express
+// dev server so `npm run dev` keeps working unconfigured.
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3010/api";
 
 const getHeaders = (isMultipart = false) => {
   const token = localStorage.getItem("token");
@@ -29,6 +34,41 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ids }),
     }).then((r) => r.json()),
+
+  // Lineages
+  getLineageTree: (slug) =>
+    fetch(`${API_BASE}/lineages/${encodeURIComponent(slug)}/tree`, {
+      headers: getHeaders(false),
+    }).then((r) => r.json()),
+  getLineages: () => fetch(`${API_BASE}/lineages`).then((r) => r.json()),
+  requestLineage: (data) =>
+    fetch(`${API_BASE}/lineages`, {
+      method: "POST",
+      headers: getHeaders(false),
+      body: JSON.stringify(data),
+    }).then(async (response) => {
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Unable to request lineage");
+      return data;
+    }),
+  getAdminLineages: () => fetch(`${API_BASE}/lineages/admin/all`, { headers: getHeaders(false) }).then((r) => r.json()),
+  approveLineage: (id) => fetch(`${API_BASE}/lineages/admin/${id}/approve`, { method: 'PATCH', headers: getHeaders(false) }).then((r) => r.json()),
+  getLineageMembers: (lineageId) => fetch(`${API_BASE}/lineages/${lineageId}/members`, { headers: getHeaders(false) }).then((r) => r.json()),
+  addLineageMember: (lineageId, personId, modeOfJoining) => fetch(`${API_BASE}/lineages/${lineageId}/members`, {
+    method: 'POST', headers: getHeaders(false), body: JSON.stringify({ personId, modeOfJoining })
+  }).then((r) => r.json()),
+  setLineageRoot: (lineageId, memberId) => fetch(`${API_BASE}/lineages/${lineageId}/members/${memberId}/root`, {
+    method: 'PATCH', headers: getHeaders(false)
+  }).then((r) => r.json()),
+  createRelationship: (lineageId, data) => fetch(`${API_BASE}/lineages/${lineageId}/relationships`, {
+    method: 'POST', headers: getHeaders(false), body: JSON.stringify(data)
+  }).then((r) => r.json()),
+  reorderChildren: (lineageId, parentPersonId, childIds) => fetch(`${API_BASE}/lineages/${lineageId}/parents/${parentPersonId}/children-order`, {
+    method: 'PATCH', headers: getHeaders(false), body: JSON.stringify({ childIds })
+  }).then((r) => r.json()),
+  createProfileEditor: (data) => fetch(`${API_BASE}/users/profile-editors`, { method: 'POST', headers: getHeaders(false), body: JSON.stringify(data) }).then((r) => r.json()),
+  getPendingChanges: () => fetch(`${API_BASE}/users/change-requests/pending`, { headers: getHeaders(false) }).then((r) => r.json()),
+  reviewChange: (id, approved) => fetch(`${API_BASE}/users/change-requests/${id}`, { method: 'PATCH', headers: getHeaders(false), body: JSON.stringify({ approved }) }).then((r) => r.json()),
 
   // Admin Mutations
   createPerson: (formData) =>

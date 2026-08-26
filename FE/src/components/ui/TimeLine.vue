@@ -5,9 +5,9 @@
     </div>
 
     <div v-else class="timeline-track">
-      <div 
-        v-for="(milestone, index) in sortedMilestones" 
-        :key="index" 
+      <div
+        v-for="(milestone, index) in sortedMilestones"
+        :key="index"
         class="timeline-event-node"
       >
         <div class="timeline-marker-axis">
@@ -111,5 +111,27 @@ const formatDate = (dateString) => {
   font-size: 0.9rem;
   color: #334155;
   line-height: 1.5;
+}
+
+[data-theme="dark"] .timeline-empty {
+  color: var(--text-subtle);
+}
+[data-theme="dark"] .marker-dot {
+  background-color: var(--accent);
+  border-color: var(--accent-soft);
+}
+[data-theme="dark"] .axis-connector-line {
+  background-color: var(--border);
+}
+[data-theme="dark"] .timeline-event-content {
+  background: var(--surface-muted);
+  border-color: var(--border);
+}
+[data-theme="dark"] .event-timestamp-badge {
+  color: var(--accent-strong);
+  background-color: var(--accent-soft);
+}
+[data-theme="dark"] .event-narrative-text {
+  color: var(--text);
 }
 </style>

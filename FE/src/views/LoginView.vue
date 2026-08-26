@@ -1,5 +1,6 @@
 <template>
   <div class="login-container">
+    <div class="theme-toggle-corner"><ThemeToggle /></div>
     <div class="login-card">
       <h2>Agburu Admin Access</h2>
       <p class="subtitle">Sign in to manage lineage records</p>
@@ -7,21 +8,21 @@
       <form @submit.prevent="handleSubmit">
         <div class="form-group">
           <label for="email">Email Address</label>
-          <input 
-            type="email" 
-            id="email" 
-            v-model="email" 
-            required 
+          <input
+            type="email"
+            id="email"
+            v-model="email"
+            required
             placeholder="admin@agburu.com"
           />
         </div>
 
         <div class="form-group">
           <label for="password">Password</label>
-          <input 
-            type="password" 
-            id="password" 
-            v-model="password" 
+          <input
+            type="password"
+            id="password"
+            v-model="password"
             required
           />
         </div>
@@ -41,6 +42,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useAuth } from '@/composables/useAuth';
+import ThemeToggle from '@/components/ui/ThemeToggle.vue';
 
 const email = ref('');
 const password = ref('');
@@ -53,11 +55,17 @@ const handleSubmit = async () => {
 
 <style scoped>
 .login-container {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
   background-color: #f9fafb;
+}
+.theme-toggle-corner {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
 }
 .login-card {
   width: 100%;
@@ -117,5 +125,30 @@ button:disabled {
   color: #dc2626;
   font-size: 0.875rem;
   margin-bottom: 1rem;
+}
+
+[data-theme="dark"] .login-container {
+  background-color: var(--bg);
+}
+[data-theme="dark"] .login-card {
+  background: var(--surface);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+}
+[data-theme="dark"] h2 {
+  color: var(--text);
+}
+[data-theme="dark"] .subtitle {
+  color: var(--text-muted);
+}
+[data-theme="dark"] label {
+  color: var(--text-muted);
+}
+[data-theme="dark"] input {
+  background: var(--surface-muted);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+[data-theme="dark"] input:focus {
+  border-color: var(--accent);
 }
 </style>

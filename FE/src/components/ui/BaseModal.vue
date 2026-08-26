@@ -14,12 +14,12 @@
 
       <div class="modal-body-content">
         <div class="profile-summary-block">
-          <img 
-            :src="activePerson.profilePicture || 'https://placehold.co/150x150?text=No+Photo'" 
-            alt="Profile Avatar" 
+          <img
+            :src="activePerson.profilePicture || 'https://placehold.co/150x150?text=No+Photo'"
+            alt="Profile Avatar"
             class="modal-profile-avatar"
           />
-          
+
           <div class="meta-details-grid">
             <div class="meta-item">
               <span class="meta-label">Gender:</span>
@@ -32,7 +32,7 @@
             <div class="meta-item">
               <span class="meta-label">Lifespan Period:</span>
               <span class="meta-value">
-                {{ formatDate(activePerson.birthDate) }} — 
+                {{ formatDate(activePerson.birthDate) }} —
                 {{ activePerson.deathDate ? formatDate(activePerson.deathDate) : 'Present (Alive)' }}
               </span>
             </div>
@@ -242,4 +242,54 @@ const formatDate = (dateString) => {
 }
 .navigate-profile-btn:hover { background-color: #1d4ed8; }
 .text-capitalize { text-transform: capitalize; }
+
+[data-theme="dark"] .modal-card-surface {
+  background: var(--surface);
+}
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer {
+  border-color: var(--border);
+}
+[data-theme="dark"] .header-titles h3 {
+  color: var(--text);
+}
+[data-theme="dark"] .close-modal-btn {
+  color: var(--text-subtle);
+}
+[data-theme="dark"] .close-modal-btn:hover {
+  color: var(--text);
+}
+[data-theme="dark"] .modal-profile-avatar {
+  border-color: var(--border);
+  background-color: var(--surface-hover);
+}
+[data-theme="dark"] .meta-label {
+  color: var(--text-muted);
+}
+[data-theme="dark"] .meta-value {
+  color: var(--text);
+}
+[data-theme="dark"] .divider-line {
+  background-color: var(--border);
+}
+[data-theme="dark"] .biography-teaser-section h4 {
+  color: var(--text);
+}
+[data-theme="dark"] .biography-teaser-section p {
+  color: var(--text-muted);
+}
+[data-theme="dark"] .placeholder-text {
+  color: var(--text-subtle) !important;
+}
+[data-theme="dark"] .modal-footer {
+  background-color: var(--surface-muted);
+}
+[data-theme="dark"] .cancel-btn {
+  background: var(--surface);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+[data-theme="dark"] .cancel-btn:hover {
+  background-color: var(--surface-hover);
+}
 </style>

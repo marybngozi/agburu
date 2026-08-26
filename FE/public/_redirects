@@ -1,0 +1,9 @@
+# Vue Router runs in "history" mode (createWebHistory), so real URLs like
+# /umeghigido or /admin/lineages need to load the app's index.html and let
+# Vue Router take over client-side — Cloudflare Pages otherwise has no
+# server route for anything but the exact files it built, and would 404 on
+# a direct visit or a page refresh on any route other than "/".
+# Vite copies everything in /public into the root of /dist on build, so
+# this file lands at dist/_redirects, which Cloudflare Pages reads
+# automatically — no dashboard configuration needed.
+/*    /index.html   200
