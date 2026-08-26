@@ -1,0 +1,25 @@
+{
+  // Cloudflare's dashboard now creates new git-connected projects as
+  // Workers deploys (`wrangler deploy`) rather than the classic Pages
+  // flow, and without a config file Wrangler tries to auto-detect the
+  // project — that auto-detection is what was failing while trying to
+  // parse vite.config.js, even though the actual Vite build succeeded
+  // fine right before it. This file tells Wrangler explicitly "just
+  // serve the static dist/ folder", skipping auto-detection entirely.
+  //
+  // IMPORTANT: replace "name" below with your actual Cloudflare project
+  // name (shown in the dashboard, e.g. Workers & Pages > your project).
+  // It needs to match exactly, or Wrangler may try to create a new
+  // project instead of deploying to the existing one.
+  "name": "agburu",
+  "compatibility_date": "2026-08-26",
+  "assets": {
+    "directory": "./dist",
+    // Vue Router runs in history mode, so any real URL (e.g. /umeghigido)
+    // needs to fall through to index.html and let Vue Router handle it
+    // client-side, the same reason public/_redirects exists for the
+    // classic Pages flow. This is the equivalent setting for the newer
+    // Workers-static-assets deploy path Cloudflare is now using.
+    "not_found_handling": "single-page-application"
+  }
+}
