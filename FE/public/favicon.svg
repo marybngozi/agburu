@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-labelledby="title">
+  <title id="title">Agburu family tree logo</title>
+  <path fill="#dce7da" d="M60 10c-19 0-34 13-34 30 0 6 2 11 5 15-12 2-21 12-21 24 0 14 12 25 27 25h46c15 0 27-11 27-25 0-12-9-22-21-24 3-4 5-9 5-15 0-17-15-30-34-30Z"/>
+  <path fill="none" stroke="#1b4639" stroke-linecap="round" stroke-linejoin="round" stroke-width="7" d="M60 25v48M60 45 39 28M60 50l23-20M60 67 37 55M60 71l25-15"/>
+  <path fill="none" stroke="#b85b36" stroke-linecap="round" stroke-width="5" d="M60 73v16"/>
+  <circle cx="34" cy="88" r="8" fill="#b85b36"/><circle cx="55" cy="93" r="9" fill="#b85b36"/><circle cx="79" cy="88" r="8" fill="#b85b36"/>
+  <path fill="none" stroke="#b85b36" stroke-linecap="round" stroke-width="5" d="M41 93 47 96m17 0 7-4"/>
+</svg>
