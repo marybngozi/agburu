@@ -1,44 +1,63 @@
 <template>
-  <main class="map-page">
-    <header class="map-header">
-      <RouterLink to="/">← All lineages</RouterLink>
-      <div class="lineage-title">
-        <p>{{ lineage?.name || "Loading lineage…" }}</p>
-        <small v-if="lineage">/{{ lineage.slug }}</small>
+  <main class="h-screen overflow-hidden bg-sand-50 font-sans dark:bg-slate-950">
+    <header
+      class="absolute z-10 top-2 left-2 right-2 md:top-4 md:left-4 md:right-4 min-h-11.5 flex items-center justify-between gap-2 px-4 py-2.6 bg-sand-50/95 border border-stone-200 rounded-[10px] shadow-[0_4px_18px_rgba(23,53,45,0.04)] dark:bg-slate-900 dark:border-slate-800 dark:shadow-[0_4px_18px_rgba(0,0,0,0.4)]"
+    >
+      <RouterLink
+        to="/"
+        class="text-[0.7rem] md:text-[0.8rem] text-forest-900 no-underline font-semibold dark:text-slate-100"
+        >← All lineages</RouterLink
+      >
+      <div class="text-center">
+        <p class="m-0 font-serif font-bold text-base">
+          {{ lineage?.name || "Loading lineage…" }}
+        </p>
+        <small v-if="lineage" class="text-stone-500 dark:text-slate-400"
+          >/{{ lineage.slug }}</small
+        >
       </div>
-      <div class="header-actions">
+      <div class="flex items-center gap-2.4">
         <ThemeToggle />
-        <RouterLink to="/create-lineage">Create a lineage</RouterLink>
+        <RouterLink
+          to="/create-lineage"
+          class="text-[0.7rem] md:text-[0.8rem] text-forest-900 no-underline font-semibold dark:text-slate-100"
+          >Create a lineage</RouterLink
+        >
       </div>
     </header>
 
     <aside
       v-if="lineage"
-      class="lineage-overview"
-      :class="{ 'panel-collapsed': !panelExpanded }"
+      class="absolute z-5 top-20 left-2 md:top-23.2 md:left-4 w-[min(380px,calc(100vw-2rem))] max-w-62.5 md:max-w-none px-4 py-3.6 bg-sand-50/95 border border-stone-200 rounded-xl shadow-[0_8px_26px_rgba(23,53,45,0.05)] dark:bg-slate-900 dark:border-slate-800 dark:shadow-[0_8px_26px_rgba(0,0,0,0.5)]"
     >
       <button
         type="button"
-        class="panel-toggle"
+        class="w-full flex items-center justify-between gap-2 p-0 bg-transparent border-0 cursor-pointer text-left"
         :aria-expanded="panelExpanded"
         @click="panelExpanded = !panelExpanded"
       >
-        <span class="eyebrow">Family story</span>
         <span
-          class="chevron"
-          :class="{ 'chevron-collapsed': !panelExpanded }"
+          class="block text-[0.65rem] font-extrabold tracking-[0.09em] uppercase text-sand-700 dark:text-clay-400"
+          >Family story</span
+        >
+        <span
+          class="text-sand-700 text-[0.8rem] leading-none transition-transform duration-150 ease-in-out dark:text-slate-400"
+          :class="{ '-rotate-90': !panelExpanded }"
           aria-hidden="true"
           >▾</span
         >
       </button>
-      <div v-if="panelExpanded" class="panel-body">
-        <p :class="{ 'story-collapsed': isStoryLong && !storyExpanded }">
+      <div v-if="panelExpanded">
+        <p
+          class="mt-1.4 mb-0 text-forest-800 text-[0.85rem] leading-[1.45] font-serif dark:text-slate-100"
+          :class="{ 'line-clamp-3': isStoryLong && !storyExpanded }"
+        >
           {{ storyText }}
         </p>
         <button
           v-if="isStoryLong"
           type="button"
-          class="story-toggle"
+          class="mt-1.8 p-0 bg-transparent border-0 text-forest-700 text-[0.72rem] font-bold font-sans cursor-pointer hover:text-forest-900 hover:underline dark:text-clay-400 dark:hover:text-clay-300"
           @click="storyExpanded = !storyExpanded"
         >
           {{ storyExpanded ? "Show less" : "Read full story" }}
@@ -46,26 +65,41 @@
       </div>
     </aside>
 
-    <aside v-if="unconnectedPeople.length" class="unconnected-panel">
-      <div class="unconnected-heading">
+    <aside
+      v-if="unconnectedPeople.length"
+      class="absolute z-5 top-auto right-2 bottom-2 md:top-23.2 md:right-4 md:bottom-auto w-[min(270px,calc(100vw-1rem))] md:w-67.5 p-3.6 bg-sand-50/95 border border-stone-200 rounded-xl shadow-[0_8px_26px_rgba(23,53,45,0.05)] dark:bg-slate-900 dark:border-slate-800 dark:shadow-[0_8px_26px_rgba(0,0,0,0.5)]"
+    >
+      <div class="flex items-center justify-between">
         <div>
-          <span class="eyebrow">Needs connection</span>
-          <h2>Not yet connected</h2>
+          <span
+            class="block text-[0.65rem] font-extrabold tracking-[0.09em] uppercase text-sand-700 dark:text-clay-400"
+            >Needs connection</span
+          >
+          <h2
+            class="mt-0.72 mb-0 text-forest-900 text-[0.95rem] dark:text-slate-100"
+          >
+            Not yet connected
+          </h2>
         </div>
-        <span class="member-count">{{ unconnectedPeople.length }}</span>
+        <span
+          class="badge justify-center min-w-5.6 bg-clay-100 text-sand-800 dark:bg-slate-800 dark:text-clay-300"
+          >{{ unconnectedPeople.length }}</span
+        >
       </div>
-      <p>
+      <p
+        class="mt-2.2 mb-2.8 text-[0.72rem] leading-[1.4] text-stone-500 dark:text-slate-400"
+      >
         These members have not yet been linked to anyone in the family tree.
       </p>
-      <div class="unconnected-list">
+      <div class="grid gap-1.6 max-h-54 overflow-y-auto">
         <div
           v-for="person in unconnectedPeople"
           :key="person.id"
-          class="person-row"
+          class="w-full flex items-center gap-1.6"
         >
           <button
             type="button"
-            class="person-info-btn"
+            class="flex-1 min-w-0 p-1.6 flex items-center gap-2 text-forest-900 bg-white border border-stone-200 rounded-lg text-[0.76rem] font-semibold text-left cursor-pointer hover:border-stone-300 hover:bg-stone-50 dark:text-slate-100 dark:bg-slate-900 dark:border-slate-800 dark:hover:border-slate-700 dark:hover:bg-slate-800"
             @click="openProfile(person)"
           >
             <img
@@ -74,14 +108,19 @@
                 'https://placehold.co/72x72?text=No+Photo'
               "
               alt=""
+              class="w-6.5 h-6.5 rounded-full object-cover bg-stone-200 shrink-0 dark:bg-slate-800"
             />
-            <span>{{ person.name }}</span>
-            <b aria-hidden="true">›</b>
+            <span class="flex-1 truncate">{{ person.name }}</span>
+            <b
+              aria-hidden="true"
+              class="text-stone-400 text-[1.15rem] font-normal dark:text-slate-500"
+              >›</b
+            >
           </button>
           <button
             v-if="isAdmin"
             type="button"
-            class="connect-btn"
+            class="shrink-0 px-2.2 py-1.6 border border-clay-600 rounded-lg bg-sand-50 text-clay-600 text-[0.68rem] font-bold cursor-pointer hover:bg-clay-600 hover:text-white dark:bg-slate-800 dark:border-clay-400 dark:text-clay-400 dark:hover:bg-clay-400 dark:hover:text-white"
             title="Connect this person to the family tree"
             @click="connectPerson(person)"
           >
@@ -91,7 +130,12 @@
       </div>
     </aside>
 
-    <div v-if="error" class="status">{{ error }}</div>
+    <div
+      v-if="error"
+      class="h-full grid place-items-center text-red-800 dark:text-red-400"
+    >
+      {{ error }}
+    </div>
     <VueFlow
       v-else
       v-model:nodes="nodes"
@@ -116,29 +160,55 @@
         <BranchEdge v-bind="edgeProps" />
       </template>
     </VueFlow>
-    <div v-if="showGestureHint" class="gesture-hint">
-      <p>🤏 Pinch to zoom · ✋ Drag to explore · Tap a card for details</p>
-      <button type="button" @click="dismissGestureHint" aria-label="Dismiss hint">
+    <div
+      v-if="showGestureHint"
+      class="absolute z-10 left-1/2 bottom-4 -translate-x-1/2 flex items-center gap-2 max-w-[calc(100vw-1.5rem)] pl-3.4 pr-2 py-2.2 bg-forest-900/92 text-sand-100 rounded-full shadow-[0_8px_20px_rgba(0,0,0,0.25)]"
+    >
+      <p class="m-0 text-[0.72rem] font-semibold truncate">
+        🤏 Pinch to zoom · ✋ Drag to explore · Tap a card for details
+      </p>
+      <button
+        type="button"
+        class="shrink-0 w-5.5 h-5.5 grid place-items-center border-0 rounded-full bg-white/15 text-inherit text-base leading-none cursor-pointer hover:bg-white/[0.28]"
+        @click="dismissGestureHint"
+        aria-label="Dismiss hint"
+      >
         ×
       </button>
     </div>
     <div
       v-if="lineage"
-      class="edge-style-control"
-      :class="{ 'control-collapsed': !edgeControlExpanded }"
+      class="absolute z-10 right-4 bottom-4 flex flex-col-reverse items-end gap-1.6 rounded-xl"
+      :class="
+        edgeControlExpanded
+          ? 'bg-sand-50/95 border border-stone-200 shadow-[0_8px_20px_rgba(0,0,0,0.1)] dark:bg-slate-900 dark:border-slate-800'
+          : 'bg-transparent border border-transparent shadow-none'
+      "
     >
       <button
         type="button"
-        class="edge-style-toggle"
+        class="flex items-center gap-1.6 rounded-[10px] bg-sand-50/95 border border-stone-200 shadow-[0_8px_20px_rgba(0,0,0,0.1)] font-sans font-semibold text-forest-900 cursor-pointer hover:border-stone-300 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100 dark:hover:border-clay-400"
+        :class="
+          edgeControlExpanded
+            ? 'px-2.8 py-2.4 text-[0.78rem]'
+            : 'p-2.2 text-base'
+        "
         :aria-expanded="edgeControlExpanded"
-        :aria-label="edgeControlExpanded ? 'Collapse connector style' : 'Choose connector style'"
+        :aria-label="
+          edgeControlExpanded
+            ? 'Collapse connector style'
+            : 'Choose connector style'
+        "
         @click="edgeControlExpanded = !edgeControlExpanded"
       >
         <span aria-hidden="true">🌿</span>
         <span v-if="edgeControlExpanded">Connector style</span>
       </button>
-      <label v-if="edgeControlExpanded" class="edge-style-body">
-        <select v-model="edgeStyle">
+      <label v-if="edgeControlExpanded" class="flex items-center px-2.8 pb-2.8">
+        <select
+          v-model="edgeStyle"
+          class="px-2 py-1.6 border border-stone-300 rounded-lg bg-white text-forest-900 font-sans font-semibold text-[0.78rem] dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
+        >
           <option
             v-for="option in EDGE_STYLE_OPTIONS"
             :key="option.value"
@@ -158,7 +228,15 @@
 </template>
 
 <script setup>
-import { computed, markRaw, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import {
+  computed,
+  markRaw,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from "vue";
 import { useRouter } from "vue-router";
 import { useVueFlow, VueFlow } from "@vue-flow/core";
 import { hierarchy, tree } from "d3-hierarchy";
@@ -168,6 +246,7 @@ import SeeMoreNode from "@/components/canvas/SeeMoreNode.vue";
 import BranchEdge from "@/components/canvas/BranchEdge.vue";
 import BaseModal from "@/components/ui/BaseModal.vue";
 import ThemeToggle from "@/components/ui/ThemeToggle.vue";
+import { setPageTitle, withSiteSuffix } from "@/composables/useDocumentMeta";
 
 const props = defineProps({ slug: { type: String, required: true } });
 const router = useRouter();
@@ -420,7 +499,9 @@ const layout = (people, relationships) => {
       target: `more-${marker.parentId}`,
       type: edgeStyle.value,
       class: "branch-edge more-edge",
-      data: { strokeWidth: strokeWidthForDepth(depths.get(marker.parentId) ?? 0) },
+      data: {
+        strokeWidth: strokeWidthForDepth(depths.get(marker.parentId) ?? 0),
+      },
     })),
   ];
 };
@@ -452,7 +533,8 @@ onMounted(async () => {
   try {
     if (isMobileViewport) {
       try {
-        gestureHintDismissed.value = localStorage.getItem(GESTURE_HINT_KEY) === "1";
+        gestureHintDismissed.value =
+          localStorage.getItem(GESTURE_HINT_KEY) === "1";
       } catch {
         gestureHintDismissed.value = false;
       }
@@ -460,6 +542,10 @@ onMounted(async () => {
     const data = await api.getLineageTree(props.slug);
     if (!data.people) throw new Error(data.message || "Lineage unavailable");
     lineage.value = data.lineage;
+    setPageTitle(
+      withSiteSuffix(data.lineage?.name),
+      data.lineage?.description || undefined,
+    );
     rawPeople.value = data.people;
     rawRelationships.value = data.relationships;
     layout(rawPeople.value, rawRelationships.value);
@@ -500,462 +586,23 @@ const handleNodeClick = (event) => event.event.preventDefault();
 @import "@vue-flow/core/dist/style.css";
 @import "@vue-flow/core/dist/theme-default.css";
 
-.map-page {
-  height: 100vh;
-  overflow: hidden;
-  background: #f7f8f5;
-  font-family: system-ui, sans-serif;
-}
-.map-header {
-  position: absolute;
-  z-index: 10;
-  top: 1rem;
-  left: 1rem;
-  right: 1rem;
-  min-height: 46px;
-  padding: 0.65rem 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #fffcf6ef;
-  border: 1px solid #e1e6df;
-  border-radius: 10px;
-  box-shadow: 0 4px 18px #17352d0a;
-}
-.map-header a {
-  font-size: 0.8rem;
-  color: #17352d;
-  text-decoration: none;
-  font-weight: 600;
-}
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-.lineage-title {
-  text-align: center;
-}
-.lineage-title p {
-  margin: 0;
-  font:
-    bold 1rem Georgia,
-    serif;
-}
-.lineage-title small {
-  color: #77837a;
-}
-.lineage-overview,
-.unconnected-panel {
-  position: absolute;
-  z-index: 5;
-  background: #fffcf6f2;
-  border: 1px solid #e1e6df;
-  border-radius: 12px;
-  box-shadow: 0 8px 26px #17352d0d;
-}
-.lineage-overview {
-  top: 5.8rem;
-  left: 1rem;
-  width: min(380px, calc(100vw - 2rem));
-  padding: 0.9rem 1rem;
-}
-.lineage-overview.panel-collapsed {
-  padding-bottom: 0.9rem;
-}
-.panel-toggle {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0;
-  background: none;
-  border: 0;
-  cursor: pointer;
-  text-align: left;
-  font: inherit;
-}
-.panel-toggle .eyebrow {
-  margin: 0;
-}
-.chevron {
-  color: #7f6242;
-  font-size: 0.8rem;
-  line-height: 1;
-  transition: transform 0.15s ease;
-}
-.chevron-collapsed {
-  transform: rotate(-90deg);
-}
-.eyebrow {
-  display: block;
-  color: #7f6242;
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
-.lineage-overview p {
-  margin: 0.35rem 0 0;
-  color: #405248;
-  font:
-    0.85rem/1.45 Georgia,
-    serif;
-}
-.lineage-overview .story-collapsed {
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-}
-.story-toggle {
-  margin-top: 0.45rem;
-  padding: 0;
-  color: #4d6f5a;
-  background: none;
-  border: 0;
-  font:
-    700 0.72rem system-ui,
-    sans-serif;
-  cursor: pointer;
-}
-.story-toggle:hover {
-  color: #17352d;
-  text-decoration: underline;
-}
-.unconnected-panel {
-  top: 5.8rem;
-  right: 1rem;
-  width: 270px;
-  padding: 0.9rem;
-}
-.unconnected-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.unconnected-heading h2 {
-  margin: 0.18rem 0 0;
-  color: #17352d;
-  font-size: 0.95rem;
-}
-.member-count {
-  min-width: 1.4rem;
-  padding: 0.17rem 0.35rem;
-  color: #735128;
-  background: #f5ead7;
-  border-radius: 99px;
-  font-size: 0.7rem;
-  text-align: center;
-}
-.unconnected-panel > p {
-  margin: 0.55rem 0 0.7rem;
-  color: #64736b;
-  font-size: 0.72rem;
-  line-height: 1.4;
-}
-.unconnected-list {
-  display: grid;
-  gap: 0.4rem;
-  max-height: 216px;
-  overflow-y: auto;
-}
-.person-row {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-.person-info-btn {
-  flex: 1;
-  min-width: 0;
-  padding: 0.4rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #243a30;
-  background: #fff;
-  border: 1px solid #e4e7e1;
-  border-radius: 8px;
-  font:
-    600 0.76rem system-ui,
-    sans-serif;
-  text-align: left;
-  cursor: pointer;
-}
-.person-info-btn:hover {
-  border-color: #b5c2b8;
-  background: #fbfdf9;
-}
-.person-row img {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  object-fit: cover;
-  background: #e6e8e4;
-  flex-shrink: 0;
-}
-.person-row span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex: 1;
-}
-.person-row b {
-  color: #8a9b90;
-  font-size: 1.15rem;
-  font-weight: 400;
-}
-.connect-btn {
-  flex-shrink: 0;
-  padding: 0.4rem 0.55rem;
-  border: 1px solid #b25433;
-  border-radius: 8px;
-  background: #fdf1ea;
-  color: #b25433;
-  font:
-    700 0.68rem system-ui,
-    sans-serif;
-  cursor: pointer;
-}
-.connect-btn:hover {
-  background: #b25433;
-  color: #fff;
-}
-.status {
-  height: 100%;
-  display: grid;
-  place-items: center;
-  color: #a33b2a;
-}
-.gesture-hint {
-  position: absolute;
-  z-index: 10;
-  left: 50%;
-  bottom: 1rem;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  max-width: calc(100vw - 1.5rem);
-  padding: 0.55rem 0.5rem 0.55rem 0.85rem;
-  background: rgba(23, 53, 45, 0.92);
-  color: #f3f1e7;
-  border-radius: 99px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-}
-.gesture-hint p {
-  margin: 0;
-  font-size: 0.72rem;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.gesture-hint button {
-  flex-shrink: 0;
-  width: 22px;
-  height: 22px;
-  display: grid;
-  place-items: center;
-  border: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
-  color: inherit;
-  font-size: 1rem;
-  line-height: 1;
-  cursor: pointer;
-}
-.gesture-hint button:hover {
-  background: rgba(255, 255, 255, 0.28);
-}
 /* Built-in Vue Flow edge types (smoothstep, default/bezier, step, straight)
    render through Vue Flow's own edge component rather than BranchEdge, so
    they fall back to Vue Flow's plain ".vue-flow__edge-path" line. Styling
    that here keeps every connector option looking like it belongs to the
    app instead of reverting to Vue Flow's default black line. The custom
-   "branch" type ignores this — BranchEdge draws its own <path> elements. */
+   "branch" type ignores this — BranchEdge draws its own <path> elements.
+   These target Vue Flow's own internally-rendered DOM, which lives outside
+   this component's template, so they must stay as global CSS. */
 .vue-flow__edge.branch-edge .vue-flow__edge-path {
-  stroke: #9c6b3e;
+  stroke: var(--color-clay-700);
   stroke-width: 3.5;
 }
 .vue-flow__edge.branch-edge.more-edge .vue-flow__edge-path {
   stroke-dasharray: 3 9;
   opacity: 0.65;
 }
-.edge-style-control {
-  position: absolute;
-  z-index: 10;
-  right: 1rem;
-  bottom: 1rem;
-  display: flex;
-  flex-direction: column-reverse;
-  align-items: flex-end;
-  gap: 0.4rem;
-  background: #fffcf6ef;
-  border: 1px solid #e1e6df;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-}
-.edge-style-control.control-collapsed {
-  background: transparent;
-  border-color: transparent;
-  box-shadow: none;
-}
-.edge-style-toggle {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.6rem 0.7rem;
-  border: 1px solid #e1e6df;
-  border-radius: 10px;
-  background: #fffcf6ef;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  font:
-    600 0.78rem system-ui,
-    sans-serif;
-  color: #17352d;
-  cursor: pointer;
-}
-.control-collapsed .edge-style-toggle {
-  padding: 0.55rem;
-  font-size: 1rem;
-}
-.edge-style-toggle:hover {
-  border-color: #b5c2b8;
-}
-.edge-style-body {
-  display: flex;
-  align-items: center;
-  padding: 0 0.7rem 0.7rem;
-}
-.edge-style-body select {
-  padding: 0.4rem 0.5rem;
-  border: 1px solid #d6ddd3;
-  border-radius: 8px;
-  background: #fff;
-  color: #17352d;
-  font:
-    600 0.78rem system-ui,
-    sans-serif;
-}
-@media (max-width: 720px) {
-  .map-header {
-    left: 0.5rem;
-    right: 0.5rem;
-    top: 0.5rem;
-  }
-  .map-header a {
-    font-size: 0.7rem;
-  }
-  .lineage-overview {
-    top: 5rem;
-    left: 0.5rem;
-    max-width: 250px;
-  }
-  .unconnected-panel {
-    top: auto;
-    right: 0.5rem;
-    bottom: 0.5rem;
-    width: min(270px, calc(100vw - 1rem));
-  }
-}
-
-/* Dark mode */
-[data-theme="dark"] .map-page {
-  background: var(--bg);
-}
-[data-theme="dark"] .map-header {
-  background: var(--surface);
-  border-color: var(--border);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
-}
-[data-theme="dark"] .map-header a {
-  color: var(--text);
-}
-[data-theme="dark"] .lineage-title small {
-  color: var(--text-muted);
-}
-[data-theme="dark"] .lineage-overview,
-[data-theme="dark"] .unconnected-panel {
-  background: var(--surface);
-  border-color: var(--border);
-  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.5);
-}
-[data-theme="dark"] .eyebrow {
-  color: var(--accent);
-}
-[data-theme="dark"] .chevron {
-  color: var(--text-muted);
-}
-[data-theme="dark"] .lineage-overview p {
-  color: var(--text);
-}
-[data-theme="dark"] .story-toggle {
-  color: var(--accent);
-}
-[data-theme="dark"] .story-toggle:hover {
-  color: var(--accent-strong);
-}
-[data-theme="dark"] .unconnected-heading h2 {
-  color: var(--text);
-}
-[data-theme="dark"] .member-count {
-  color: var(--accent-strong);
-  background: var(--surface-hover);
-}
-[data-theme="dark"] .unconnected-panel > p {
-  color: var(--text-muted);
-}
-[data-theme="dark"] .person-info-btn {
-  color: var(--text);
-  background: var(--surface);
-  border-color: var(--border);
-}
-[data-theme="dark"] .person-info-btn:hover {
-  border-color: var(--border-strong);
-  background: var(--surface-hover);
-}
-[data-theme="dark"] .person-row img {
-  background: var(--surface-hover);
-}
-[data-theme="dark"] .person-row b {
-  color: var(--text-subtle);
-}
-[data-theme="dark"] .connect-btn {
-  background: var(--surface-hover);
-  border-color: var(--accent);
-  color: var(--accent);
-}
-[data-theme="dark"] .connect-btn:hover {
-  background: var(--accent);
-  color: var(--accent-contrast);
-}
-[data-theme="dark"] .status {
-  color: #f87171;
-}
 [data-theme="dark"] .vue-flow__edge.branch-edge .vue-flow__edge-path {
-  stroke: #c99a68;
-}
-[data-theme="dark"] .edge-style-control,
-[data-theme="dark"] .edge-style-toggle {
-  background: var(--surface);
-  border-color: var(--border);
-}
-[data-theme="dark"] .edge-style-control.control-collapsed {
-  background: transparent;
-  border-color: transparent;
-}
-[data-theme="dark"] .edge-style-toggle {
-  color: var(--text);
-}
-[data-theme="dark"] .edge-style-toggle:hover {
-  border-color: var(--accent);
-}
-[data-theme="dark"] .edge-style-body select {
-  background: var(--surface-2, var(--surface));
-  border-color: var(--border);
-  color: var(--text);
+  stroke: var(--color-clay-400);
 }
 </style>

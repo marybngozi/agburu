@@ -1,0 +1,11 @@
+# Agburu — public site
+# Admin routes are also behind a login (see src/router/index.js
+# requiresAuth guard), but disallowing them here too keeps crawlers from
+# wasting time on pages they can never actually index.
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /login
+
+Sitemap: https://agburu.pages.dev/sitemap.xml

@@ -1,46 +1,60 @@
 <template>
-  <div class="dashboard-container">
+  <div class="mx-auto my-8 max-w-275 px-4 font-sans">
     <!-- Top Action Bar -->
-    <div class="dashboard-header">
-      <div class="title-block">
-        <h2>Agburu Lineage Directory</h2>
-        <p>
+    <div
+      class="mb-8 flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between"
+    >
+      <div>
+        <h2 class="mb-1 text-[1.75rem] text-gray-900 dark:text-slate-100">
+          Agburu Lineage Directory
+        </h2>
+        <p class="text-[0.95rem] text-gray-500 dark:text-slate-400">
           Manage family tree records, connections, and historical timelines.
         </p>
       </div>
-      <div class="header-buttons">
+      <div class="flex w-full flex-wrap items-center gap-3 md:w-auto md:flex-nowrap">
         <ThemeToggle />
         <button
           @click="$router.push({ name: 'admin-lineages' })"
-          class="logout-btn"
+          class="btn-secondary flex-1 md:flex-none"
         >
           Manage Lineages
         </button>
         <button
           @click="$router.push({ name: 'admin-editors' })"
-          class="logout-btn"
+          class="btn-secondary flex-1 md:flex-none"
         >
           Profile Editors
         </button>
-        <button @click="goToAddMember" class="add-member-btn">
+        <button
+          @click="goToAddMember"
+          class="inline-flex flex-1 items-center justify-center gap-2 rounded-md bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 md:flex-none"
+        >
           + Add New Person
         </button>
-        <button @click="handleLogout" class="logout-btn">Sign Out</button>
+        <button @click="handleLogout" class="btn-secondary flex-1 md:flex-none">
+          Sign Out
+        </button>
       </div>
     </div>
 
     <!-- Filters & Search Panel -->
-    <div class="filter-panel">
-      <div class="search-box">
+    <div
+      class="mb-6 flex flex-col items-stretch gap-3 rounded-lg border border-gray-200 bg-gray-50 px-6 py-4 md:flex-row md:items-center md:justify-between dark:border-slate-700 dark:bg-slate-800"
+    >
+      <div>
         <input
           type="text"
           v-model="searchQuery"
           @input="debounceSearch"
           placeholder="Search members by name (e.g., Chidi)..."
+          class="field-input md:w-80"
         />
       </div>
-      <div class="toggle-box">
-        <label>
+      <div>
+        <label
+          class="flex cursor-pointer items-center gap-2 text-sm text-gray-600 dark:text-slate-400"
+        >
           <input
             type="checkbox"
             v-model="showDeleted"
@@ -52,27 +66,38 @@
     </div>
 
     <!-- Core Grid Directory Table -->
-    <div class="table-wrapper">
-      <table class="directory-table">
+    <div class="card overflow-x-auto overflow-y-hidden md:overflow-hidden">
+      <table class="w-full min-w-180 border-collapse text-left text-[0.9rem] md:min-w-0">
         <thead>
           <tr>
-            <th>Photo</th>
-            <th>Title Info</th>
-            <th>Full Name</th>
-            <th>Gender</th>
-            <th>Mode of Joining</th>
-            <th>Status</th>
-            <th class="actions-head">Actions</th>
+            <th class="border-b border-gray-200 bg-gray-100 px-4 py-3.5 font-semibold text-gray-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
+              Photo
+            </th>
+            <th class="border-b border-gray-200 bg-gray-100 px-4 py-3.5 font-semibold text-gray-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
+              Title Info
+            </th>
+            <th class="border-b border-gray-200 bg-gray-100 px-4 py-3.5 font-semibold text-gray-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
+              Full Name
+            </th>
+            <th class="border-b border-gray-200 bg-gray-100 px-4 py-3.5 font-semibold text-gray-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
+              Gender
+            </th>
+            <th class="border-b border-gray-200 bg-gray-100 px-4 py-3.5 font-semibold text-gray-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
+              Status
+            </th>
+            <th class="border-b border-gray-200 bg-gray-100 px-4 py-3.5 text-right font-semibold text-gray-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="isLoading">
-            <td colspan="7" class="state-cell">
+            <td colspan="6" class="p-12 text-center italic text-gray-400 dark:text-slate-500">
               Loading records from directory...
             </td>
           </tr>
           <tr v-else-if="members.length === 0">
-            <td colspan="7" class="state-cell">
+            <td colspan="6" class="p-12 text-center italic text-gray-400 dark:text-slate-500">
               No family tree records found.
             </td>
           </tr>
@@ -81,55 +106,65 @@
             v-else
             v-for="member in members"
             :key="member.id"
-            :class="{ 'archived-row': member.isDeleted }"
+            :class="{ 'bg-red-50 dark:bg-red-400/[0.08]': member.isDeleted }"
           >
-            <td>
+            <td class="border-b border-gray-100 px-4 py-3.5 text-gray-600 dark:border-slate-800 dark:text-slate-400">
               <img
                 :src="
                   member.profilePicture ||
                   'https://placehold.co/100x100?text=No+Photo'
                 "
                 alt="Avatar"
-                class="table-avatar"
+                class="h-10 w-10 rounded-full border border-gray-200 object-cover dark:border-slate-800"
               />
             </td>
-            <td>
-              <div class="title-tags">
-                <span v-if="member.title" class="badge-civil">{{
-                  member.title
-                }}</span>
-                <span v-if="member.titledName" class="badge-native">{{
-                  member.titledName
-                }}</span>
+            <td class="border-b border-gray-100 px-4 py-3.5 text-gray-600 dark:border-slate-800 dark:text-slate-400">
+              <div class="flex gap-1">
+                <span
+                  v-if="member.title"
+                  class="inline-flex items-center rounded bg-sky-100 px-1.6 py-0.6 text-xs font-medium text-sky-700"
+                  >{{ member.title }}</span
+                >
+                <span
+                  v-if="member.titledName"
+                  class="inline-flex items-center rounded bg-amber-100 px-1.6 py-0.6 text-xs font-medium text-amber-700"
+                  >{{ member.titledName }}</span
+                >
                 <span v-if="!member.title && !member.titledName">—</span>
               </div>
             </td>
-            <td class="font-medium">{{ member.name }}</td>
-            <td class="capitalize-text">{{ member.gender }}</td>
-            <td class="capitalize-text">{{ member.modeOfJoining }}</td>
-            <td>
+            <td class="border-b border-gray-100 px-4 py-3.5 font-medium text-gray-900 dark:border-slate-800 dark:text-slate-100">{{ member.name }}</td>
+            <td class="border-b border-gray-100 px-4 py-3.5 capitalize text-gray-600 dark:border-slate-800 dark:text-slate-400">{{ member.gender }}</td>
+            <td class="border-b border-gray-100 px-4 py-3.5 text-gray-600 dark:border-slate-800 dark:text-slate-400">
               <span
-                :class="member.isDeleted ? 'status-deleted' : 'status-active'"
+                :class="
+                  member.isDeleted
+                    ? 'inline-flex items-center rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-700'
+                    : 'inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700'
+                "
               >
                 {{ member.isDeleted ? "Archived" : "Active" }}
               </span>
             </td>
-            <td class="actions-cell">
-              <button @click="editMember(member.id)" class="edit-btn">
+            <td class="flex justify-end gap-2 border-b border-gray-100 px-4 py-3.5 text-gray-600 dark:border-slate-800 dark:text-slate-400">
+              <button
+                @click="editMember(member.id)"
+                class="rounded bg-blue-50 px-3 py-1.4 text-[0.825rem] font-medium text-blue-700"
+              >
                 Edit
               </button>
 
               <button
                 v-if="!member.isDeleted"
                 @click="toggleDeleteStatus(member.id, true)"
-                class="delete-btn"
+                class="rounded bg-red-100 px-3 py-1.4 text-[0.825rem] font-medium text-red-700"
               >
                 Delete
               </button>
               <button
                 v-else
                 @click="toggleDeleteStatus(member.id, false)"
-                class="restore-btn"
+                class="rounded bg-emerald-50 px-3 py-1.4 text-[0.825rem] font-medium text-emerald-700"
               >
                 Restore
               </button>
@@ -140,21 +175,21 @@
     </div>
 
     <!-- Standard Numeric Pagination Controls -->
-    <div class="pagination-row">
+    <div class="mt-6 flex flex-wrap items-center justify-center gap-3 md:flex-nowrap md:justify-between">
       <button
         @click="navigatePage(currentPage - 1)"
         :disabled="currentPage <= 1 || isLoading"
-        class="nav-btn"
+        class="cursor-pointer rounded border border-gray-300 bg-white px-4 py-2 text-[0.85rem] disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:disabled:bg-slate-800 dark:disabled:text-slate-500"
       >
         ← Previous Page
       </button>
-      <span class="page-indicator"
+      <span class="text-[0.85rem] text-gray-500 dark:text-slate-400"
         >Page {{ currentPage }} of {{ totalPages || 1 }}</span
       >
       <button
         @click="navigatePage(currentPage + 1)"
         :disabled="currentPage >= totalPages || isLoading"
-        class="nav-btn"
+        class="cursor-pointer rounded border border-gray-300 bg-white px-4 py-2 text-[0.85rem] disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:disabled:bg-slate-800 dark:disabled:text-slate-500"
       >
         Next Page →
       </button>
@@ -250,275 +285,3 @@ const goToAddMember = () => router.push({ name: "add-member" });
 const editMember = (id) => router.push({ path: `/admin/edit-member/${id}` });
 const handleLogout = async () => await logout();
 </script>
-
-<style scoped>
-.dashboard-container {
-  max-width: 1100px;
-  margin: 2rem auto;
-  padding: 0 1rem;
-  font-family: system-ui, sans-serif;
-}
-.dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-.title-block h2 {
-  margin: 0 0 0.25rem 0;
-  color: #111827;
-  font-size: 1.75rem;
-}
-.title-block p {
-  margin: 0;
-  color: #6b7280;
-  font-size: 0.95rem;
-}
-.header-buttons {
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-}
-.add-member-btn {
-  background-color: #2563eb;
-  color: white;
-  border: none;
-  padding: 0.625rem 1.25rem;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-}
-.logout-btn {
-  background-color: white;
-  border: 1px solid #d1d5db;
-  color: #374151;
-  padding: 0.625rem 1.25rem;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.filter-panel {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #f9fafb;
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  margin-bottom: 1.5rem;
-}
-.search-box input {
-  width: 320px;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-}
-.toggle-box label {
-  font-size: 0.875rem;
-  color: #4b5563;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-}
-
-.table-wrapper {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-}
-.directory-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-  font-size: 0.9rem;
-}
-.directory-table th {
-  background: #f3f4f6;
-  color: #374151;
-  padding: 0.875rem 1rem;
-  font-weight: 600;
-  border-bottom: 1px solid #e5e7eb;
-}
-.directory-table td {
-  padding: 0.875rem 1rem;
-  border-bottom: 1px solid #f3f4f6;
-  color: #4b5563;
-}
-.archived-row {
-  background-color: #fef2f2;
-}
-
-.table-avatar {
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 1px solid #e5e7eb;
-}
-.title-tags {
-  display: flex;
-  gap: 0.25rem;
-}
-.badge-civil {
-  background: #e0f2fe;
-  color: #0369a1;
-  padding: 0.15rem 0.4rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-.badge-native {
-  background: #fef3c7;
-  color: #b45309;
-  padding: 0.15rem 0.4rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.status-active {
-  background: #dcfce7;
-  color: #15803d;
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-.status-deleted {
-  background: #fee2e2;
-  color: #b91c1c;
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.actions-head {
-  text-align: right;
-}
-.actions-cell {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end;
-}
-.actions-cell button {
-  border: none;
-  padding: 0.35rem 0.75rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.825rem;
-  font-weight: 500;
-}
-.edit-btn {
-  background: #eff6ff;
-  color: #1d4ed8;
-}
-.delete-btn {
-  background: #fee2e2;
-  color: #b91c1c;
-}
-.restore-btn {
-  background: #ecfdf5;
-  color: #047857;
-}
-
-.pagination-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 1.5rem;
-}
-.nav-btn {
-  background: white;
-  border: 1px solid #d1d5db;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.85rem;
-}
-.nav-btn:disabled {
-  color: #9ca3af;
-  cursor: not-allowed;
-  background: #f9fafb;
-}
-.page-indicator {
-  font-size: 0.85rem;
-  color: #6b7280;
-}
-.font-medium {
-  font-weight: 500;
-  color: #111827 !important;
-}
-.capitalize-text {
-  text-transform: capitalize;
-}
-.state-cell {
-  text-align: center;
-  padding: 3rem !important;
-  color: #9ca3af;
-  font-style: italic;
-}
-
-[data-theme="dark"] .title-block h2 { color: var(--text); }
-[data-theme="dark"] .title-block p { color: var(--text-muted); }
-[data-theme="dark"] .logout-btn {
-  background-color: var(--surface);
-  border-color: var(--border-strong);
-  color: var(--text);
-}
-[data-theme="dark"] .filter-panel {
-  background: var(--surface-muted);
-  border-color: var(--border);
-}
-[data-theme="dark"] .search-box input {
-  background: var(--surface);
-  border-color: var(--border-strong);
-  color: var(--text);
-}
-[data-theme="dark"] .toggle-box label { color: var(--text-muted); }
-[data-theme="dark"] .table-wrapper {
-  background: var(--surface);
-  border-color: var(--border);
-}
-[data-theme="dark"] .directory-table th {
-  background: var(--surface-muted);
-  color: var(--text-muted);
-  border-bottom-color: var(--border);
-}
-[data-theme="dark"] .directory-table td {
-  border-bottom-color: var(--border);
-  color: var(--text-muted);
-}
-[data-theme="dark"] .archived-row {
-  background-color: rgba(248, 113, 113, 0.08);
-}
-[data-theme="dark"] .table-avatar {
-  border-color: var(--border);
-}
-[data-theme="dark"] .nav-btn {
-  background: var(--surface);
-  border-color: var(--border-strong);
-  color: var(--text);
-}
-[data-theme="dark"] .nav-btn:disabled {
-  color: var(--text-subtle);
-  background: var(--surface-muted);
-}
-[data-theme="dark"] .page-indicator { color: var(--text-muted); }
-[data-theme="dark"] .font-medium { color: var(--text) !important; }
-[data-theme="dark"] .state-cell { color: var(--text-subtle); }
-
-@media (max-width: 800px) {
-  .dashboard-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
-  .header-buttons { flex-wrap: wrap; width: 100%; }
-  .header-buttons button { flex: 1 1 auto; }
-  .filter-panel { flex-direction: column; align-items: stretch; gap: 0.75rem; }
-  .search-box input { width: 100%; box-sizing: border-box; }
-  .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .directory-table { min-width: 720px; }
-  .pagination-row { flex-wrap: wrap; gap: 0.75rem; justify-content: center; }
-}
-</style>

@@ -1,23 +1,23 @@
 <template>
-  <div class="timeline-wrapper">
-    <div v-if="sortedMilestones.length === 0" class="timeline-empty">
+  <div class="py-2 font-sans">
+    <div v-if="sortedMilestones.length === 0" class="text-sm italic text-slate-400 dark:text-slate-500">
       No historical milestone logs cataloged for this profile record.
     </div>
 
-    <div v-else class="timeline-track">
+    <div v-else class="relative flex flex-col">
       <div
         v-for="(milestone, index) in sortedMilestones"
         :key="index"
-        class="timeline-event-node"
+        class="flex gap-6"
       >
-        <div class="timeline-marker-axis">
-          <div class="marker-dot"></div>
-          <div v-if="index !== sortedMilestones.length - 1" class="axis-connector-line"></div>
+        <div class="relative flex w-4 flex-col items-center">
+          <div class="z-2 h-3.5 w-3.5 rounded-full border-[3px] border-blue-100 bg-blue-600 dark:border-clay-900 dark:bg-clay-500"></div>
+          <div v-if="index !== sortedMilestones.length - 1" class="my-1 w-0.75 flex-1 bg-slate-200 dark:bg-slate-700"></div>
         </div>
 
-        <div class="timeline-event-content card-pop">
-          <span class="event-timestamp-badge">{{ formatDate(milestone.date) }}</span>
-          <p class="event-narrative-text">{{ milestone.description }}</p>
+        <div class="mb-6 flex-1 rounded-lg border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
+          <span class="mb-2 inline-block rounded bg-blue-50 px-2 py-0.8 text-xs font-bold text-blue-800 dark:bg-clay-900 dark:text-clay-300">{{ formatDate(milestone.date) }}</span>
+          <p class="m-0 text-sm leading-relaxed text-slate-700 dark:text-slate-100">{{ milestone.description }}</p>
         </div>
       </div>
     </div>
@@ -47,91 +47,3 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString(undefined, options);
 };
 </script>
-
-<style scoped>
-.timeline-wrapper {
-  padding: 0.5rem 0;
-  font-family: system-ui, sans-serif;
-}
-.timeline-empty {
-  font-style: italic;
-  color: #94a3b8;
-  font-size: 0.9rem;
-}
-.timeline-track {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
-.timeline-event-node {
-  display: flex;
-  gap: 1.5rem;
-}
-.timeline-marker-axis {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  width: 16px;
-}
-.marker-dot {
-  width: 14px;
-  height: 14px;
-  background-color: #2563eb;
-  border: 3px solid #dbeafe;
-  border-radius: 50%;
-  z-index: 2;
-}
-.axis-connector-line {
-  width: 3px;
-  background-color: #e2e8f0;
-  flex: 1;
-  margin: 4px 0;
-}
-.timeline-event-content {
-  flex: 1;
-  background: #f8fafc;
-  border: 1px solid #f1f5f9;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-}
-.event-timestamp-badge {
-  display: inline-block;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #1e40af;
-  background-color: #eff6ff;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  margin-bottom: 0.5rem;
-}
-.event-narrative-text {
-  margin: 0;
-  font-size: 0.9rem;
-  color: #334155;
-  line-height: 1.5;
-}
-
-[data-theme="dark"] .timeline-empty {
-  color: var(--text-subtle);
-}
-[data-theme="dark"] .marker-dot {
-  background-color: var(--accent);
-  border-color: var(--accent-soft);
-}
-[data-theme="dark"] .axis-connector-line {
-  background-color: var(--border);
-}
-[data-theme="dark"] .timeline-event-content {
-  background: var(--surface-muted);
-  border-color: var(--border);
-}
-[data-theme="dark"] .event-timestamp-badge {
-  color: var(--accent-strong);
-  background-color: var(--accent-soft);
-}
-[data-theme="dark"] .event-narrative-text {
-  color: var(--text);
-}
-</style>

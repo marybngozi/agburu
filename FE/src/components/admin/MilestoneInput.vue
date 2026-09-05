@@ -1,33 +1,35 @@
 <template>
-  <div class="milestones-section">
-    <h3>Historical Milestones & Timelines</h3>
-    <p class="description">Add key life achievements, titles, or events chronologically.</p>
+  <div class="mb-6 rounded-md border border-slate-200 bg-slate-50 p-6 dark:border-slate-700 dark:bg-slate-800">
+    <h3 class="mb-1 text-lg text-slate-800 dark:text-slate-100">Historical Milestones & Timelines</h3>
+    <p class="mb-5 text-[0.85rem] text-slate-500 dark:text-slate-400">Add key life achievements, titles, or events chronologically.</p>
 
     <div
       v-for="(milestone, index) in milestones"
       :key="index"
-      class="milestone-row"
+      class="mb-3 flex items-center gap-4"
     >
-      <div class="input-group date-input">
+      <div class="flex-1">
         <input
           type="date"
           v-model="milestone.date"
           required
+          class="field-input"
         />
       </div>
 
-      <div class="input-group text-input">
+      <div class="flex-[3]">
         <input
           type="text"
           v-model="milestone.description"
           placeholder="e.g., Conferred with the traditional titled name..."
           required
+          class="field-input"
         />
       </div>
 
       <button
         type="button"
-        class="delete-btn"
+        class="rounded px-3 py-2 font-bold text-red-600 bg-red-100 hover:bg-red-300"
         @click="removeRow(index)"
         title="Delete Milestone"
       >
@@ -37,7 +39,7 @@
 
     <button
       type="button"
-      class="add-btn"
+      class="mt-2 rounded border border-dashed border-blue-600 bg-white px-4 py-2 font-medium text-blue-600 hover:bg-blue-50 dark:border-clay-400 dark:bg-slate-900 dark:text-clay-400 dark:hover:bg-clay-950"
       @click="addRow"
     >
       + Add Milestone Row
@@ -57,87 +59,3 @@ const removeRow = (index) => {
   milestones.value.splice(index, 1);
 };
 </script>
-
-<style scoped>
-.milestones-section {
-  border: 1px solid #e5e7eb;
-  padding: 1.5rem;
-  border-radius: 6px;
-  background-color: #f9fafb;
-  margin-bottom: 1.5rem;
-}
-h3 {
-  margin: 0 0 0.25rem 0;
-  color: #1f2937;
-  font-size: 1.1rem;
-}
-.description {
-  margin: 0 0 1.25rem 0;
-  color: #6b7280;
-  font-size: 0.85rem;
-}
-.milestone-row {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  margin-bottom: 0.75rem;
-}
-.input-group input {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-.date-input {
-  flex: 1;
-}
-.text-input {
-  flex: 3;
-}
-.delete-btn {
-  background: #fee2e2;
-  color: #dc2626;
-  border: none;
-  padding: 0.5rem 0.75rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-}
-.delete-btn:hover {
-  background: #fca5a5;
-}
-.add-btn {
-  background: white;
-  border: 1px dashed #2563eb;
-  color: #2563eb;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
-  margin-top: 0.5rem;
-}
-.add-btn:hover {
-  background: #eff6ff;
-}
-
-[data-theme="dark"] .milestones-section {
-  background-color: var(--surface-muted);
-  border-color: var(--border);
-}
-[data-theme="dark"] h3 { color: var(--text); }
-[data-theme="dark"] .description { color: var(--text-muted); }
-[data-theme="dark"] .input-group input {
-  background: var(--surface);
-  border-color: var(--border-strong);
-  color: var(--text);
-}
-[data-theme="dark"] .add-btn {
-  background: var(--surface);
-  border-color: var(--accent);
-  color: var(--accent);
-}
-[data-theme="dark"] .add-btn:hover {
-  background: var(--accent-soft);
-}
-</style>

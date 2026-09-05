@@ -49,7 +49,12 @@
     </defs>
     <!-- Bark shadow: a soft, wider underlay so the branch reads as rounded
          wood rather than a flat ribbon. -->
-    <path :d="path" class="branch-shadow" :style="{ strokeWidth: width + 3 }" fill="none" />
+    <path
+      :d="path"
+      class="branch-shadow stroke-clay-950/32 dark:stroke-black/55"
+      :style="{ strokeWidth: width + 3 }"
+      fill="none"
+    />
     <!-- Core: gradient + a light turbulence displacement, giving the stroke
          a slightly irregular, hand-carved edge instead of a perfect curve. -->
     <path
@@ -62,7 +67,7 @@
          a lit top edge, like a rounded twig catching light. -->
     <path
       :d="path"
-      class="branch-highlight"
+      class="branch-highlight stroke-amber-100/40 dark:stroke-amber-200/20"
       :style="{ strokeWidth: Math.max(1, width - 4) }"
       fill="none"
     />
@@ -84,10 +89,10 @@ const props = defineProps({
   data: { type: Object, default: () => ({}) },
 });
 
-// Generations closer to the root render a thicker "trunk"; layout code can
-// pass a per-edge data.strokeWidth (see LineageMapView's depth-based
-// calculation) or fall back to a flat default for trees that don't track
-// depth (e.g. the dagre-based profile tree).
+// Generations closer to the root render a thicker "trunk"; layout code
+// passes a per-edge data.strokeWidth (both LineageMapView.vue and
+// useLineage.js compute this the same way, by depth from the root) or this
+// falls back to a flat default if some future caller doesn't track depth.
 const width = computed(() => props.data?.strokeWidth ?? 6);
 
 const gradientId = computed(() => `branch-gradient-${props.id}`);
@@ -126,35 +131,25 @@ const path = computed(() => {
 </script>
 
 <style scoped>
-.branch-shadow {
-  stroke: rgba(59, 37, 18, 0.32);
-  stroke-linecap: round;
-}
-.branch-core {
-  stroke-linecap: round;
-}
+/* stroke-linecap has no Tailwind utility equivalent, so it stays here for
+   the three paths this component draws itself. */
+.branch-shadow,
+.branch-core,
 .branch-highlight {
-  stroke: rgba(255, 233, 200, 0.4);
   stroke-linecap: round;
 }
+
 /* .more-edge is set via the `class` field on "more" marker edge objects,
    landing on the vue-flow__edge wrapper that's an ancestor of this
    component's own template — Vue's scoped CSS leaves ancestor selectors
-   like this unscoped, so a plain descendant selector is enough. */
+   like this unscoped, so a plain descendant selector is enough. Tailwind
+   utility classes can't express "when an ancestor outside this template
+   has class X", so this stays plain CSS. */
 .more-edge .branch-core {
   stroke-dasharray: 3 9;
   opacity: 0.65;
 }
 .more-edge .branch-highlight {
   opacity: 0.3;
-}
-
-/* Same reasoning: [data-theme="dark"] lives on <html>, well outside this
-   component, so it stays an unscoped ancestor selector too. */
-[data-theme="dark"] .branch-shadow {
-  stroke: rgba(0, 0, 0, 0.55);
-}
-[data-theme="dark"] .branch-highlight {
-  stroke: rgba(255, 220, 170, 0.2);
 }
 </style>

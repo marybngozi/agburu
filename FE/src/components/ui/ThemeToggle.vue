@@ -1,7 +1,7 @@
 <template>
   <button
     type="button"
-    class="theme-toggle"
+    class="inline-flex h-8.6 w-8.6 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white p-0 text-[0.95rem] leading-none text-slate-900 cursor-pointer hover:bg-slate-100"
     :aria-label="
       theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
     "
@@ -17,25 +17,3 @@ import { useTheme } from "@/composables/useTheme";
 
 const { theme, toggleTheme } = useTheme();
 </script>
-
-<style scoped>
-.theme-toggle {
-  width: 2.15rem;
-  height: 2.15rem;
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  border: 1px solid var(--border, #e5e7eb);
-  background: var(--surface, #fff);
-  color: var(--text, #111827);
-  cursor: pointer;
-  font-size: 0.95rem;
-  line-height: 1;
-  padding: 0;
-}
-.theme-toggle:hover {
-  background: var(--surface-hover, #f3f4f6);
-}
-</style>

@@ -1,37 +1,37 @@
 <template>
-  <div class="modal-backdrop-overlay" @click.self="$emit('close')">
-    <div class="modal-card-surface animate-pop">
-      <div class="modal-header">
-        <div class="header-titles">
-          <span v-if="activePerson.title || activePerson.titledName" class="title-row">
-            <span v-if="activePerson.title" class="civil-tag">{{ activePerson.title }}</span>
-            <span v-if="activePerson.titledName" class="native-tag">{{ activePerson.titledName }}</span>
+  <div class="fixed inset-0 z-1000 flex items-center justify-center bg-slate-900/60 p-4 font-sans backdrop-blur-sm" @click.self="$emit('close')">
+    <div class="animate-[modal-pop_0.25s_cubic-bezier(0.16,1,0.3,1)] flex w-full max-w-130 flex-col overflow-hidden rounded-xl bg-white shadow-[0_20px_25px_-5px_rgba(0,0,0,0.15),0_10px_10px_-5px_rgba(0,0,0,0.04)] dark:bg-slate-900">
+      <div class="flex items-start justify-between border-b border-slate-100 px-6 py-5 dark:border-slate-800">
+        <div>
+          <span v-if="activePerson.title || activePerson.titledName" class="flex gap-1.4">
+            <span v-if="activePerson.title" class="rounded bg-sky-100 px-1.6 py-0.6 text-[0.7rem] font-semibold text-sky-700">{{ activePerson.title }}</span>
+            <span v-if="activePerson.titledName" class="rounded bg-amber-100 px-1.6 py-0.6 text-[0.7rem] font-semibold text-amber-700">{{ activePerson.titledName }}</span>
           </span>
-          <h3>{{ activePerson.name }}</h3>
+          <h3 class="mt-1 text-[1.35rem] font-bold text-slate-900 dark:text-slate-100">{{ activePerson.name }}</h3>
         </div>
-        <button type="button" class="close-modal-btn" @click="$emit('close')">✕</button>
+        <button type="button" class="cursor-pointer border-none bg-transparent p-1 text-[1.15rem] text-slate-400 hover:text-slate-500 dark:text-slate-500 dark:hover:text-slate-100" @click="$emit('close')">✕</button>
       </div>
 
-      <div class="modal-body-content">
-        <div class="profile-summary-block">
+      <div class="max-h-[60vh] overflow-y-auto p-6">
+        <div class="flex items-center gap-6">
           <img
             :src="activePerson.profilePicture || 'https://placehold.co/150x150?text=No+Photo'"
             alt="Profile Avatar"
-            class="modal-profile-avatar"
+            class="h-25 w-25 rounded-full border-[3px] border-slate-100 bg-slate-50 object-cover dark:border-slate-800 dark:bg-slate-800"
           />
 
-          <div class="meta-details-grid">
-            <div class="meta-item">
-              <span class="meta-label">Gender:</span>
-              <span class="meta-value text-capitalize">{{ activePerson.gender }}</span>
+          <div class="flex flex-1 flex-col gap-2">
+            <div class="flex gap-2 text-sm">
+              <span class="min-w-27.5 font-medium text-slate-500 dark:text-slate-400">Gender:</span>
+              <span class="capitalize font-semibold text-slate-700 dark:text-slate-100">{{ activePerson.gender }}</span>
             </div>
-            <div class="meta-item">
-              <span class="meta-label">Lineage Join:</span>
-              <span class="meta-value text-capitalize">{{ activePerson.modeOfJoining }}</span>
+            <div class="flex gap-2 text-sm">
+              <span class="min-w-27.5 font-medium text-slate-500 dark:text-slate-400">Lineage Join:</span>
+              <span class="capitalize font-semibold text-slate-700 dark:text-slate-100">{{ activePerson.modeOfJoining }}</span>
             </div>
-            <div class="meta-item">
-              <span class="meta-label">Lifespan Period:</span>
-              <span class="meta-value">
+            <div class="flex gap-2 text-sm">
+              <span class="min-w-27.5 font-medium text-slate-500 dark:text-slate-400">Lifespan Period:</span>
+              <span class="font-semibold text-slate-700 dark:text-slate-100">
                 {{ formatDate(activePerson.birthDate) }} —
                 {{ activePerson.deathDate ? formatDate(activePerson.deathDate) : 'Present (Alive)' }}
               </span>
@@ -39,22 +39,22 @@
           </div>
         </div>
 
-        <hr class="divider-line" />
+        <hr class="my-6 h-px border-0 bg-slate-100 dark:bg-slate-800" />
 
-        <div class="biography-teaser-section">
-          <h4>Profile Summary</h4>
-          <p v-if="activePerson.biographySummary">
+        <div>
+          <h4 class="mb-2 text-[0.95rem] text-slate-800 dark:text-slate-100">Profile Summary</h4>
+          <p v-if="activePerson.biographySummary" class="m-0 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
             {{ activePerson.biographySummary }}
           </p>
-          <p v-else class="placeholder-text">
+          <p v-else class="m-0 text-sm italic leading-relaxed text-slate-400 dark:text-slate-500">
             No short profile teaser summary provided for this lineage member record.
           </p>
         </div>
       </div>
 
-      <div class="modal-footer">
-        <button type="button" class="cancel-btn" @click="$emit('close')">Close</button>
-        <button type="button" class="navigate-profile-btn" @click="navigateToFullProfile">
+      <div class="flex justify-end gap-3 border-t border-slate-100 bg-slate-50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800">
+        <button type="button" class="btn-secondary" @click="$emit('close')">Close</button>
+        <button type="button" class="inline-flex items-center justify-center rounded-md bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700" @click="navigateToFullProfile">
           Read More & View Tree →
         </button>
       </div>
@@ -90,206 +90,9 @@ const formatDate = (dateString) => {
 </script>
 
 <style scoped>
-.modal-backdrop-overlay {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(4px);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  font-family: system-ui, sans-serif;
-}
-
-.modal-card-surface {
-  background: white;
-  width: 100%;
-  max-width: 520px;
-  border-radius: 12px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Entry Pop Animation */
-.animate-pop {
-  animation: modal-pop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
+/* Entry pop animation cannot be expressed as a utility class alone */
 @keyframes modal-pop {
   from { transform: scale(0.95); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.header-titles h3 {
-  margin: 0.25rem 0 0 0;
-  color: #0f172a;
-  font-size: 1.35rem;
-  font-weight: 700;
-}
-
-.title-row {
-  display: flex;
-  gap: 0.35rem;
-}
-.civil-tag { background: #e0f2fe; color: #0369a1; font-size: 0.7rem; padding: 0.15rem 0.4rem; border-radius: 4px; font-weight: 600; }
-.native-tag { background: #fef3c7; color: #b45309; font-size: 0.7rem; padding: 0.15rem 0.4rem; border-radius: 4px; font-weight: 600; }
-
-.close-modal-btn {
-  background: none;
-  border: none;
-  font-size: 1.15rem;
-  color: #94a3b8;
-  cursor: pointer;
-  padding: 0.25rem;
-}
-.close-modal-btn:hover { color: #64748b; }
-
-.modal-body-content {
-  padding: 1.5rem;
-  overflow-y: auto;
-  max-height: 60vh;
-}
-
-.profile-summary-block {
-  display: flex;
-  gap: 1.5rem;
-  align-items: center;
-}
-
-.modal-profile-avatar {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid #f1f5f9;
-  background-color: #f8fafc;
-}
-
-.meta-details-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  flex: 1;
-}
-
-.meta-item {
-  font-size: 0.875rem;
-  display: flex;
-  gap: 0.5rem;
-}
-.meta-label { color: #64748b; font-weight: 500; min-width: 110px; }
-.meta-value { color: #334155; font-weight: 600; }
-
-.divider-line {
-  border: 0;
-  height: 1px;
-  background-color: #f1f5f9;
-  margin: 1.5rem 0;
-}
-
-.biography-teaser-section h4 {
-  margin: 0 0 0.5rem 0;
-  color: #1e293b;
-  font-size: 0.95rem;
-}
-.biography-teaser-section p {
-  margin: 0;
-  font-size: 0.9rem;
-  color: #475569;
-  line-height: 1.5;
-}
-.placeholder-text { color: #94a3b8 !important; font-style: italic; }
-
-.modal-footer {
-  background-color: #f8fafc;
-  padding: 1rem 1.5rem;
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  border-top: 1px solid #f1f5f9;
-}
-
-.cancel-btn {
-  background: white;
-  border: 1px solid #cbd5e1;
-  color: #475569;
-  padding: 0.55rem 1.25rem;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-}
-.cancel-btn:hover { background-color: #f1f5f9; }
-
-.navigate-profile-btn {
-  background-color: #2563eb;
-  color: white;
-  border: none;
-  padding: 0.55rem 1.25rem;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-}
-.navigate-profile-btn:hover { background-color: #1d4ed8; }
-.text-capitalize { text-transform: capitalize; }
-
-[data-theme="dark"] .modal-card-surface {
-  background: var(--surface);
-}
-[data-theme="dark"] .modal-header,
-[data-theme="dark"] .modal-footer {
-  border-color: var(--border);
-}
-[data-theme="dark"] .header-titles h3 {
-  color: var(--text);
-}
-[data-theme="dark"] .close-modal-btn {
-  color: var(--text-subtle);
-}
-[data-theme="dark"] .close-modal-btn:hover {
-  color: var(--text);
-}
-[data-theme="dark"] .modal-profile-avatar {
-  border-color: var(--border);
-  background-color: var(--surface-hover);
-}
-[data-theme="dark"] .meta-label {
-  color: var(--text-muted);
-}
-[data-theme="dark"] .meta-value {
-  color: var(--text);
-}
-[data-theme="dark"] .divider-line {
-  background-color: var(--border);
-}
-[data-theme="dark"] .biography-teaser-section h4 {
-  color: var(--text);
-}
-[data-theme="dark"] .biography-teaser-section p {
-  color: var(--text-muted);
-}
-[data-theme="dark"] .placeholder-text {
-  color: var(--text-subtle) !important;
-}
-[data-theme="dark"] .modal-footer {
-  background-color: var(--surface-muted);
-}
-[data-theme="dark"] .cancel-btn {
-  background: var(--surface);
-  border-color: var(--border-strong);
-  color: var(--text);
-}
-[data-theme="dark"] .cancel-btn:hover {
-  background-color: var(--surface-hover);
 }
 </style>

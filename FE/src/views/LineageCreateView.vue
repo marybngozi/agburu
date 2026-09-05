@@ -1,20 +1,20 @@
 <template>
-  <main class="page">
-    <RouterLink to="/">← Back to Agburu</RouterLink>
-    <section class="card">
-      <h1>Create a lineage</h1>
-      <p>Your request is reviewed by a platform administrator before publication.</p>
-      <form v-if="!submitted" @submit.prevent="submit">
-        <label>Lineage name<input v-model.trim="form.name" required /></label>
-        <label>Public URL slug<input v-model.trim="form.slug" required placeholder="umehigido" pattern="[a-z0-9-]+" /></label>
-        <label>Visibility<select v-model="form.visibility"><option value="public">Public</option><option value="private">Private</option></select></label>
-        <label>Description<textarea v-model.trim="form.description" rows="3" /></label>
-        <label>Your name<input v-model.trim="form.requesterName" required /></label>
-        <label>Your email<input v-model.trim="form.requesterEmail" type="email" required /></label>
-        <p v-if="error" class="error">{{ error }}</p>
-        <button :disabled="saving">{{ saving ? 'Submitting…' : 'Submit for approval' }}</button>
+  <main class="min-h-screen bg-slate-50 px-4 py-12 font-sans text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <RouterLink to="/" class="mx-auto mb-4 block max-w-xl text-blue-600">← Back to Agburu</RouterLink>
+    <section class="card mx-auto max-w-xl p-8">
+      <h1 class="m-0 text-3xl font-bold">Create a lineage</h1>
+      <p class="text-slate-600 dark:text-slate-400">Your request is reviewed by a platform administrator before publication.</p>
+      <form v-if="!submitted" @submit.prevent="submit" class="mt-6 grid gap-4">
+        <label class="grid gap-1.5 text-sm font-semibold text-slate-700 dark:text-slate-100">Lineage name<input v-model.trim="form.name" required class="field-input" /></label>
+        <label class="grid gap-1.5 text-sm font-semibold text-slate-700 dark:text-slate-100">Public URL slug<input v-model.trim="form.slug" required placeholder="umehigido" pattern="[a-z0-9-]+" class="field-input" /></label>
+        <label class="grid gap-1.5 text-sm font-semibold text-slate-700 dark:text-slate-100">Visibility<select v-model="form.visibility" class="field-input"><option value="public">Public</option><option value="private">Private</option></select></label>
+        <label class="grid gap-1.5 text-sm font-semibold text-slate-700 dark:text-slate-100">Description<textarea v-model.trim="form.description" rows="3" class="field-input" /></label>
+        <label class="grid gap-1.5 text-sm font-semibold text-slate-700 dark:text-slate-100">Your name<input v-model.trim="form.requesterName" required class="field-input" /></label>
+        <label class="grid gap-1.5 text-sm font-semibold text-slate-700 dark:text-slate-100">Your email<input v-model.trim="form.requesterEmail" type="email" required class="field-input" /></label>
+        <p v-if="error" class="text-red-700 dark:text-red-400">{{ error }}</p>
+        <button :disabled="saving" class="btn-primary w-full">{{ saving ? 'Submitting…' : 'Submit for approval' }}</button>
       </form>
-      <p v-else class="success">Request received. A platform administrator will review it before the lineage goes live.</p>
+      <p v-else class="text-emerald-700 dark:text-emerald-400">Request received. A platform administrator will review it before the lineage goes live.</p>
     </section>
   </main>
 </template>
@@ -45,27 +45,3 @@ const submit = async () => {
   }
 };
 </script>
-
-<style scoped>
-.page { min-height: 100vh; background: #f8fafc; padding: 3rem 1rem; font-family: system-ui, sans-serif; color: #0f172a; }
-.page > a { display: block; max-width: 560px; margin: 0 auto 1rem; color: #2563eb; }
-.card { max-width: 560px; margin: auto; padding: 2rem; border: 1px solid #e2e8f0; border-radius: 12px; background: white; box-shadow: 0 2px 12px #0f172a0d; }
-h1 { margin: 0; } p { color: #475569; } form { display: grid; gap: 1rem; margin-top: 1.5rem; }
-label { display: grid; gap: .4rem; font-weight: 600; font-size: .9rem; } input, select, textarea { box-sizing: border-box; width: 100%; padding: .65rem; border: 1px solid #cbd5e1; border-radius: 6px; font: inherit; }
-button { background: #0f172a; color: white; border: 0; border-radius: 6px; padding: .75rem; font-weight: 600; cursor: pointer; }.error { color: #b91c1c; }.success { color: #047857; }
-
-[data-theme="dark"] .page { background: var(--bg); color: var(--text); }
-[data-theme="dark"] .card { background: var(--surface); border-color: var(--border); box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4); }
-[data-theme="dark"] p { color: var(--text-muted); }
-[data-theme="dark"] label { color: var(--text); }
-[data-theme="dark"] input,
-[data-theme="dark"] select,
-[data-theme="dark"] textarea {
-  background: var(--surface-muted);
-  border-color: var(--border-strong);
-  color: var(--text);
-}
-[data-theme="dark"] button { background: var(--accent); }
-[data-theme="dark"] .error { color: var(--danger); }
-[data-theme="dark"] .success { color: var(--success); }
-</style>

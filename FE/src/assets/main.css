@@ -1,82 +1,137 @@
-:root {
-  color-scheme: light;
-  --bg: #f9fafb;
-  --surface: #ffffff;
-  --surface-hover: #f3f4f6;
-  --surface-muted: #f8fafc;
-  --text: #111827;
-  --text-muted: #6b7280;
-  --text-subtle: #9ca3af;
-  --border: #e5e7eb;
-  --border-strong: #d1d5db;
-  --accent: #2563eb;
-  --accent-strong: #1d4ed8;
-  --accent-soft: #eff6ff;
-  --accent-contrast: #ffffff;
-  --danger: #dc2626;
-  --danger-bg: #fee2e2;
-  --success: #047857;
-  --success-bg: #dcfce7;
-  --shadow: rgba(15, 23, 42, 0.08);
+/* =============================================================================
+ * Agburu — global stylesheet & design tokens
+ * =============================================================================
+ * This file is the SINGLE SOURCE OF TRUTH for the app's visual design.
+ * Every component styles itself with Tailwind utility classes directly in
+ * its <template> (see each .vue file) — there should be no more scattered,
+ * duplicated, hand-rolled CSS across components. To change a color, a
+ * spacing scale, or the dark-mode look of the whole app, change it HERE and
+ * it updates everywhere, automatically, because every utility class
+ * (bg-clay-600, text-forest-900, etc.) compiles down to `var(--color-...)`
+ * — a real CSS custom property defined below.
+ *
+ * Structure of this file:
+ *   1. Tailwind import + typography plugin
+ *   2. Dark mode wiring (this app toggles data-theme="dark" on <html>,
+ *      not the OS color-scheme — see src/composables/useTheme.js)
+ *   3. @theme — design tokens: brand color ramps, fonts. These generate
+ *      Tailwind utilities (bg-forest-900, text-clay-600, font-serif, ...)
+ *   4. @layer base — sane global defaults (body background/text/font)
+ *   5. @layer components — small set of reusable classes for patterns
+ *      repeated across many files (buttons, form fields, cards, badges),
+ *      built with @apply so they still resolve to the same tokens above.
+ *      Prefer plain utility classes for anything that only appears once or
+ *      twice; reach for these only for the genuinely repeated patterns.
+ * ===========================================================================*/
 
-  --agburu-bg: #f7f8f5;
-  --agburu-surface: #fffcf6ef;
-  --agburu-surface-2: #fffcf6f2;
-  --agburu-text: #17352d;
-  --agburu-text-muted: #52655c;
-  --agburu-text-subtle: #8a9b90;
-  --agburu-border: #e1e6df;
-  --agburu-accent: #b25433;
-  --agburu-accent-muted: #7f6242;
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* Tells every dark: variant (dark:bg-slate-900, prose-invert's own
+   dark:-scoped rules, etc.) to key off [data-theme="dark"] on <html> or an
+   ancestor, instead of Tailwind's default `prefers-color-scheme` media
+   query — matching how useTheme.js actually applies the theme (user choice
+   persisted to localStorage, falling back to system preference only on
+   first visit). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  /* ---- Brand color ramps -------------------------------------------------
+     Two brand ramps (forest = deep green, clay = terracotta) generated from
+     the two colors in src/assets/agburu-logo.svg, plus "sand" for the warm
+     cream backgrounds used on public-facing pages. Every shade below is a
+     real CSS variable (--color-forest-900, etc.) AND a Tailwind utility
+     (bg-forest-900, text-forest-900, border-forest-900, ...). Everywhere
+     else in the app (grays, blues, status colors) uses Tailwind's built-in
+     palette (slate, blue, red, amber, emerald, pink, sky, ...) — no need to
+     redefine what Tailwind already ships. */
+  --color-forest-50: #f6f9f8;
+  --color-forest-100: #e9f2ef;
+  --color-forest-200: #cde5de;
+  --color-forest-300: #a9d6ca;
+  --color-forest-400: #7bc6b2;
+  --color-forest-500: #54b59b;
+  --color-forest-600: #429982;
+  --color-forest-700: #387b69;
+  --color-forest-800: #2d5d50;
+  --color-forest-900: #17352d; /* primary brand ink — matches the logo stroke */
+  --color-forest-950: #162823;
+
+  --color-clay-50: #faf6f5;
+  --color-clay-100: #f4eae7;
+  --color-clay-200: #e9d1c8;
+  --color-clay-300: #dfb09f;
+  --color-clay-400: #d5886c;
+  --color-clay-500: #c86441;
+  --color-clay-600: #b25433; /* primary accent — matches the logo's terracotta */
+  --color-clay-700: #88432a;
+  --color-clay-800: #663523;
+  --color-clay-900: #4a281c;
+  --color-clay-950: #2b1812;
+
+  --color-sand-50: #f8f6ef; /* the app's default warm page background */
+  --color-sand-100: #f2f0e9;
+  --color-sand-200: #e4dfcd;
+  --color-sand-300: #d6cca9;
+  --color-sand-400: #c6b57c;
+  --color-sand-500: #b49f55;
+  --color-sand-600: #998543;
+  --color-sand-700: #7a6c38;
+  --color-sand-800: #5d522d;
+  --color-sand-900: #433c23;
+  --color-sand-950: #282416;
+
+  /* ---- Fonts --------------------------------------------------------------
+     font-sans is Tailwind's default system-ui stack (used for all admin/UI
+     chrome). font-serif adds Georgia explicitly for the public marketing
+     pages' editorial headings (Home hero, lineage map header). */
+  --font-serif: Georgia, "Times New Roman", serif;
 }
 
-[data-theme="dark"] {
-  color-scheme: dark;
-  --bg: #0f1115;
-  --surface: #161a20;
-  --surface-hover: #1f242c;
-  --surface-muted: #12151a;
-  --text: #e5e7eb;
-  --text-muted: #9aa4b2;
-  --text-subtle: #6b7280;
-  --border: #262b33;
-  --border-strong: #333944;
-  --accent: #3b82f6;
-  --accent-strong: #60a5fa;
-  --accent-soft: #1c2b45;
-  --accent-contrast: #0f1115;
-  --danger: #f87171;
-  --danger-bg: #3f1d1d;
-  --success: #34d399;
-  --success-bg: #113328;
-  --shadow: rgba(0, 0, 0, 0.5);
-
-  --agburu-bg: #10140f;
-  --agburu-surface: #171d16f2;
-  --agburu-surface-2: #1a2118f2;
-  --agburu-text: #eaf1e8;
-  --agburu-text-muted: #a7b6a4;
-  --agburu-text-subtle: #7c8c79;
-  --agburu-border: #2a352a;
-  --agburu-accent: #e0835c;
-  --agburu-accent-muted: #c99a72;
+@layer base {
+  body {
+    @apply bg-sand-50 text-forest-900 font-sans antialiased;
+  }
+  [data-theme="dark"] body {
+    @apply bg-slate-950 text-slate-100;
+  }
 }
 
-* {
-  box-sizing: border-box;
-}
+@layer components {
+  /* Buttons ------------------------------------------------------------- */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-clay-600 px-5 py-2.5
+      text-sm font-semibold text-white shadow-sm transition-colors
+      hover:bg-clay-700
+      disabled:cursor-not-allowed disabled:bg-clay-300 dark:disabled:bg-clay-900;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 bg-white
+      px-4 py-2 text-sm font-medium text-slate-700 transition-colors
+      hover:border-slate-400 hover:bg-slate-50
+      dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800;
+  }
 
-html,
-body,
-#app {
-  min-height: 100%;
-}
+  /* Form fields ----------------------------------------------------------- */
+  .field-label {
+    @apply text-sm font-medium text-slate-700 dark:text-slate-300;
+  }
+  .field-input {
+    @apply w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900
+      placeholder:text-slate-400 transition-colors
+      focus:border-clay-500 focus:outline-none focus:ring-2 focus:ring-clay-500/30
+      disabled:bg-slate-100 disabled:text-slate-400
+      dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500
+      dark:disabled:bg-slate-800 dark:disabled:text-slate-500;
+  }
 
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  transition:
-    background-color 0.15s ease,
-    color 0.15s ease;
+  /* Surfaces ---------------------------------------------------------------*/
+  .card {
+    @apply rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900;
+  }
+
+  /* Badges/pills ----------------------------------------------------------- */
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold;
+  }
 }

@@ -1,11 +1,11 @@
 <template>
   <button
     type="button"
-    class="see-more-node"
+    class="flex h-16 w-35 cursor-pointer flex-col items-center justify-center gap-0.6 rounded-[10px] border-2 border-dashed border-blue-300 bg-blue-50 font-sans text-[0.8rem] font-semibold text-blue-700 shadow-[0_2px_6px_rgba(0,0,0,0.04)] hover:border-blue-400 hover:bg-blue-100 dark:border-blue-600 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:border-blue-400 dark:hover:bg-slate-800"
     @click="$emit('show-remaining-children', data.parentId)"
   >
-    <span class="see-more-count">+{{ data.hiddenCount }}</span>
-    <span class="see-more-label">See more</span>
+    <span class="text-[1.05rem] font-extrabold leading-none">+{{ data.hiddenCount }}</span>
+    <span class="text-[0.68rem] uppercase tracking-[0.04em]">See more</span>
   </button>
 </template>
 
@@ -18,48 +18,3 @@ defineProps({
 });
 defineEmits(["show-remaining-children"]);
 </script>
-
-<style scoped>
-.see-more-node {
-  width: 140px;
-  height: 64px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.15rem;
-  background: #eff6ff;
-  border: 2px dashed #93c5fd;
-  border-radius: 10px;
-  color: #1d4ed8;
-  font:
-    600 0.8rem system-ui,
-    sans-serif;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-}
-.see-more-node:hover {
-  background: #dbeafe;
-  border-color: #60a5fa;
-}
-.see-more-count {
-  font-size: 1.05rem;
-  font-weight: 800;
-  line-height: 1;
-}
-.see-more-label {
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-[data-theme="dark"] .see-more-node {
-  background: var(--accent-soft);
-  border-color: var(--accent);
-  color: var(--accent-strong);
-}
-[data-theme="dark"] .see-more-node:hover {
-  background: var(--surface-hover);
-  border-color: var(--accent-strong);
-}
-</style>

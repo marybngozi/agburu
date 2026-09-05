@@ -11,7 +11,43 @@
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Agburu Lineage</title>
+    <title>Agburu — Family Lineage Archive</title>
+
+    <!-- Static, build-time SEO tags. This is a client-rendered SPA with no
+         server-side rendering, so these tags are what non-JS crawlers and
+         link-preview bots (WhatsApp, Facebook, Twitter/X, iMessage, Slack)
+         see for EVERY page — they don't execute the JS that sets per-page
+         titles/descriptions further into the app (see
+         src/composables/useDocumentMeta.js). Google's crawler does run JS
+         and will pick up the dynamic per-route titles on top of this. -->
+    <meta
+      name="description"
+      content="Agburu is a family lineage archive — explore family trees, member profiles, and the stories that connect generations."
+    />
+    <meta name="theme-color" content="#17352d" />
+    <link rel="canonical" href="https://agburu.pages.dev/" />
+
+    <!-- Open Graph (Facebook, WhatsApp, LinkedIn, Slack, iMessage, etc.) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Agburu" />
+    <meta property="og:title" content="Agburu — Family Lineage Archive" />
+    <meta
+      property="og:description"
+      content="A home for family stories — explore family trees, member profiles, and the history that connects generations."
+    />
+    <meta property="og:url" content="https://agburu.pages.dev/" />
+    <meta property="og:image" content="https://agburu.pages.dev/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Twitter / X card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Agburu — Family Lineage Archive" />
+    <meta
+      name="twitter:description"
+      content="A home for family stories — explore family trees, member profiles, and the history that connects generations."
+    />
+    <meta name="twitter:image" content="https://agburu.pages.dev/og-image.png" />
   </head>
   <body>
     <div id="app"></div>
