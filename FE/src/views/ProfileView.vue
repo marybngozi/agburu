@@ -1,46 +1,88 @@
 <template>
-  <div class="w-screen min-h-screen h-auto overflow-visible md:h-screen md:overflow-hidden flex flex-col bg-slate-100 font-sans dark:bg-slate-950">
-    <nav class="flex items-center flex-wrap md:flex-nowrap gap-3 md:gap-6 bg-white border-b border-slate-200 px-4 md:px-6 py-3 z-10 dark:bg-slate-900 dark:border-slate-800">
+  <div
+    class="w-screen min-h-screen h-auto overflow-visible md:h-screen md:overflow-hidden flex flex-col bg-slate-100 font-sans dark:bg-slate-950"
+  >
+    <nav
+      class="flex items-center flex-wrap md:flex-nowrap gap-3 md:gap-6 bg-white border-b border-slate-200 px-4 md:px-6 py-3 z-10 dark:bg-slate-900 dark:border-slate-800"
+    >
       <button
         @click="$router.push('/')"
         class="bg-transparent border border-slate-300 px-3.5 py-1.5 rounded-md text-sm font-medium cursor-pointer text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800"
       >
         ← Main Lineage Graph
       </button>
-      <div v-if="person" class="text-sm text-slate-500 flex-1 basis-full md:basis-0 order-3 md:order-none dark:text-slate-400">
+      <div
+        v-if="person"
+        class="text-sm text-slate-500 flex-1 basis-full md:basis-0 order-3 md:order-0 dark:text-slate-400"
+      >
         Directory / Profile Workspace / <strong>{{ person.name }}</strong>
       </div>
       <ThemeToggle />
     </nav>
 
-    <div v-if="isLoading" class="flex flex-col items-center justify-center flex-1 gap-4 text-slate-500 dark:text-slate-400">
-      <div class="w-[35px] h-[35px] border-[3px] border-slate-300 border-t-blue-600 rounded-full animate-spin"></div>
+    <div
+      v-if="isLoading"
+      class="flex flex-col items-center justify-center flex-1 gap-4 text-slate-500 dark:text-slate-400"
+    >
+      <div
+        class="w-8.75 h-8.75 border-[3px] border-slate-300 border-t-blue-600 rounded-full animate-spin"
+      ></div>
       <p>Retrieving extended historical file logs...</p>
     </div>
 
-    <div v-else-if="person" class="flex-1 flex flex-col md:flex-row overflow-visible md:overflow-hidden">
-      <aside class="w-full md:w-[380px] max-h-[45vh] md:max-h-none border-b md:border-b-0 md:border-r border-slate-200 px-4 md:px-6 py-5 md:py-8 bg-white overflow-y-auto flex flex-col gap-6 box-border dark:bg-slate-900 dark:border-slate-800">
+    <div
+      v-else-if="person"
+      class="flex-1 flex flex-col md:flex-row overflow-visible md:overflow-hidden"
+    >
+      <aside
+        class="w-full md:w-95 max-h-[45vh] md:max-h-none border-b md:border-b-0 md:border-r border-slate-200 px-4 md:px-6 py-5 md:py-8 bg-white overflow-y-auto flex flex-col gap-6 box-border dark:bg-slate-900 dark:border-slate-800"
+      >
         <div class="flex gap-4 items-center">
           <img
-            :src="person.profilePicture || 'https://placehold.co/150x150?text=No+Photo'"
+            :src="
+              person.profilePicture ||
+              'https://placehold.co/150x150?text=No+Photo'
+            "
             alt="Profile Picture"
             class="w-20 h-20 rounded-full object-cover border-2 border-slate-200"
           />
           <div>
             <div class="flex gap-1">
-              <span v-if="person.title" class="bg-sky-100 text-sky-700 text-[0.6rem] px-1 py-0.5 rounded-sm font-semibold">{{ person.title }}</span>
-              <span v-if="person.titledName" class="bg-amber-100 text-amber-700 text-[0.6rem] px-1 py-0.5 rounded-sm font-semibold">{{ person.titledName }}</span>
+              <span
+                v-if="person.title"
+                class="bg-sky-100 text-sky-700 text-[0.6rem] px-1 py-0.5 rounded-sm font-semibold"
+                >{{ person.title }}</span
+              >
+              <span
+                v-if="person.titledName"
+                class="bg-amber-100 text-amber-700 text-[0.6rem] px-1 py-0.5 rounded-sm font-semibold"
+                >{{ person.titledName }}</span
+              >
             </div>
-            <h2 class="mt-1 mb-0 text-[1.35rem] text-slate-900 dark:text-slate-100">{{ person.name }}</h2>
-            <p class="mt-[0.15rem] mb-0 text-xs font-medium text-slate-500 dark:text-slate-400">
+            <h2
+              class="mt-1 mb-0 text-[1.35rem] text-slate-900 dark:text-slate-100"
+            >
+              {{ person.name }}
+            </h2>
+            <p
+              class="mt-[0.15rem] mb-0 text-xs font-medium text-slate-500 dark:text-slate-400"
+            >
               ⏳ {{ formatYear(person.birthDate) }} —
-              {{ person.deathDate ? formatYear(person.deathDate) : 'Present (Alive)' }}
+              {{
+                person.deathDate
+                  ? formatYear(person.deathDate)
+                  : "Present (Alive)"
+              }}
             </p>
           </div>
         </div>
 
         <div>
-          <h3 class="mt-0 mb-3 text-base font-bold text-slate-800 dark:text-slate-100">Detailed Historical Record</h3>
+          <h3
+            class="mt-0 mb-3 text-base font-bold text-slate-800 dark:text-slate-100"
+          >
+            Detailed Historical Record
+          </h3>
           <!-- detailedBiography is HTML written by an authenticated admin
                through the rich text editor on the Add/Edit Person form, not
                public-submitted content, so rendering it directly is the
@@ -62,39 +104,70 @@
                a dark background). Plain `prose` already ships a sensible
                default gray palette, so dropping the modifier removes the
                conflicting rule entirely instead of fighting it with
-               !important. -->
+               !important.
+
+               That fix alone turned out not to be enough: the biography
+               HTML itself can carry a literal inline style="color: rgb(0,
+               0, 0)" on individual spans (almost always left over from
+               pasting content into the rich text editor from Word, Google
+               Docs, etc). An element's own inline style always overrides a
+               class-based rule, prose/dark:prose-invert included, no matter
+               how the classes are combined — !important is the only thing
+               that can win against it. That's what the "rich-text-content"
+               class + scoped :deep() rule below is for. -->
           <div
             v-if="person.detailedBiography"
-            class="prose prose-sm max-w-none dark:prose-invert"
+            class="rich-text-content prose prose-sm max-w-none dark:prose-invert"
             v-html="person.detailedBiography"
           ></div>
-          <p v-else class="m-0 text-sm leading-relaxed italic text-slate-400 dark:text-slate-500">
-            No deeply structured narrative biography text has been logged for this profile record yet.
+          <p
+            v-else
+            class="m-0 text-sm leading-relaxed italic text-slate-400 dark:text-slate-500"
+          >
+            No deeply structured narrative biography text has been logged for
+            this profile record yet.
           </p>
         </div>
 
         <hr class="border-0 h-px bg-slate-100 my-2 dark:bg-slate-800" />
 
         <div>
-          <h3 class="mt-0 mb-3 text-base font-bold text-slate-800 dark:text-slate-100">Historical Journey Logs</h3>
+          <h3
+            class="mt-0 mb-3 text-base font-bold text-slate-800 dark:text-slate-100"
+          >
+            Historical Journey Logs
+          </h3>
           <TimeLine :milestones="person.milestones" />
         </div>
       </aside>
 
-      <main class="flex-1 flex flex-col bg-slate-50 min-h-[60vh] md:min-h-0 dark:bg-slate-950">
-        <div class="flex flex-col items-stretch justify-between gap-3 md:flex-row md:items-center md:gap-0 bg-white border-b border-slate-200 px-6 py-4 dark:bg-slate-900 dark:border-slate-800">
+      <main
+        class="flex-1 flex flex-col bg-slate-50 min-h-[60vh] md:min-h-0 dark:bg-slate-950"
+      >
+        <div
+          class="flex flex-col items-stretch justify-between gap-3 md:flex-row md:items-center md:gap-0 bg-white border-b border-slate-200 px-6 py-4 dark:bg-slate-900 dark:border-slate-800"
+        >
           <div>
-            <h3 class="m-0 text-[1.05rem] text-slate-900 dark:text-slate-100">Focused Family Tree Stream</h3>
-            <p class="mt-[0.15rem] mb-0 text-xs text-slate-500 dark:text-slate-400">Tracing lineage relationships branching dynamically directly from this member node.</p>
+            <h3 class="m-0 text-[1.05rem] text-slate-900 dark:text-slate-100">
+              Focused Family Tree Stream
+            </h3>
+            <p
+              class="mt-[0.15rem] mb-0 text-xs text-slate-500 dark:text-slate-400"
+            >
+              Tracing lineage relationships branching dynamically directly from
+              this member node.
+            </p>
           </div>
 
-          <div class="flex justify-center md:justify-start bg-slate-100 p-1 rounded-lg border border-slate-200 dark:bg-slate-800 dark:border-slate-800">
+          <div
+            class="flex justify-center md:justify-start bg-slate-100 p-1 rounded-lg border border-slate-200 dark:bg-slate-800 dark:border-slate-800"
+          >
             <button
               :class="[
                 'px-4 py-[0.45rem] text-xs font-semibold rounded-md cursor-pointer bg-transparent border-0',
                 canvasMode === 'descendants'
                   ? 'bg-white text-blue-600 shadow-[0_1px_3px_rgba(0,0,0,0.1)] dark:bg-slate-900 dark:text-blue-400'
-                  : 'text-slate-600 dark:text-slate-400'
+                  : 'text-slate-600 dark:text-slate-400',
               ]"
               @click="switchCanvasOrientation('descendants')"
             >
@@ -105,7 +178,7 @@
                 'px-4 py-[0.45rem] text-xs font-semibold rounded-md cursor-pointer bg-transparent border-0',
                 canvasMode === 'ancestors'
                   ? 'bg-white text-blue-600 shadow-[0_1px_3px_rgba(0,0,0,0.1)] dark:bg-slate-900 dark:text-blue-400'
-                  : 'text-slate-600 dark:text-slate-400'
+                  : 'text-slate-600 dark:text-slate-400',
               ]"
               @click="switchCanvasOrientation('ancestors')"
             >
@@ -149,40 +222,53 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, markRaw } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { VueFlow } from '@vue-flow/core';
-import { api } from '@/api';
-import { useLineage } from '@/composables/useLineage';
+import { ref, onMounted, watch, markRaw } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { VueFlow } from "@vue-flow/core";
+import { api } from "@/api";
+import { useLineage } from "@/composables/useLineage";
 
-import TimeLine from '@/components/ui/TimeLine.vue';
-import CustomNode from '@/components/canvas/CustomNode.vue';
-import SeeMoreNode from '@/components/canvas/SeeMoreNode.vue';
-import BranchEdge from '@/components/canvas/BranchEdge.vue';
-import ThemeToggle from '@/components/ui/ThemeToggle.vue';
-import { setPageTitle, withSiteSuffix } from '@/composables/useDocumentMeta';
+import TimeLine from "@/components/ui/TimeLine.vue";
+import CustomNode from "@/components/canvas/CustomNode.vue";
+import SeeMoreNode from "@/components/canvas/SeeMoreNode.vue";
+import BranchEdge from "@/components/canvas/BranchEdge.vue";
+import ThemeToggle from "@/components/ui/ThemeToggle.vue";
+import { setPageTitle, withSiteSuffix } from "@/composables/useDocumentMeta";
 
 const route = useRoute();
 const router = useRouter();
 
 const person = ref(null);
 const isLoading = ref(true);
-const canvasMode = ref('descendants');
+const canvasMode = ref("descendants");
 
-const nodeTypes = { custom: markRaw(CustomNode), seeMore: markRaw(SeeMoreNode) };
+const nodeTypes = {
+  custom: markRaw(CustomNode),
+  seeMore: markRaw(SeeMoreNode),
+};
 const edgeTypes = { branch: markRaw(BranchEdge) };
 
-const { nodes, edges, loadInitialTree, expandChildBranch, collapseChildBranch, revealHiddenChildren } = useLineage();
+const {
+  nodes,
+  edges,
+  loadInitialTree,
+  expandChildBranch,
+  collapseChildBranch,
+  revealHiddenChildren,
+} = useLineage();
 
 onMounted(async () => {
   await loadWorkspaceProfile(route.params.id);
 });
 
-watch(() => route.params.id, async (nextId) => {
-  if (nextId) {
-    await loadWorkspaceProfile(nextId);
-  }
-});
+watch(
+  () => route.params.id,
+  async (nextId) => {
+    if (nextId) {
+      await loadWorkspaceProfile(nextId);
+    }
+  },
+);
 
 const loadWorkspaceProfile = async (id) => {
   isLoading.value = true;
@@ -190,18 +276,18 @@ const loadWorkspaceProfile = async (id) => {
     const data = await api.getPersonById(id);
     if (data && !data.isDeleted) {
       person.value = data;
-      canvasMode.value = 'descendants';
+      canvasMode.value = "descendants";
       setPageTitle(
         withSiteSuffix(data.name),
         data.biographySummary || undefined,
       );
       await loadInitialTree(id);
     } else {
-      router.push('/');
+      router.push("/");
     }
   } catch (err) {
     console.error("Dossier retrieval crashed", err);
-    router.push('/');
+    router.push("/");
   } finally {
     isLoading.value = false;
   }
@@ -209,7 +295,7 @@ const loadWorkspaceProfile = async (id) => {
 
 const switchCanvasOrientation = async (mode) => {
   canvasMode.value = mode;
-  if (mode === 'descendants') {
+  if (mode === "descendants") {
     await loadInitialTree(person.value.id);
   } else {
     await traceAncestorsLineageTree();
@@ -217,11 +303,13 @@ const switchCanvasOrientation = async (mode) => {
 };
 
 const traceAncestorsLineageTree = async () => {
-  const localNodes = [{
-    id: person.value.id,
-    type: 'custom',
-    data: { ...person.value, isExpanded: false }
-  }];
+  const localNodes = [
+    {
+      id: person.value.id,
+      type: "custom",
+      data: { ...person.value, isExpanded: false },
+    },
+  ];
   const localEdges = [];
 
   let currentParentId = person.value.parentId;
@@ -234,14 +322,14 @@ const traceAncestorsLineageTree = async () => {
       if (pData && !pData.isDeleted) {
         localNodes.push({
           id: pData.id,
-          type: 'custom',
-          data: { ...pData, isExpanded: true }
+          type: "custom",
+          data: { ...pData, isExpanded: true },
         });
         localEdges.push({
           id: `e-${pData.id}-${targetChildId}`,
           source: pData.id,
           target: targetChildId,
-          type: 'branch'
+          type: "branch",
         });
         targetChildId = pData.id;
         currentParentId = pData.parentId;
@@ -258,7 +346,8 @@ const traceAncestorsLineageTree = async () => {
   edges.value = localEdges;
 };
 
-const handleExpandBranch = async (args) => await expandChildBranch(args.id, args.childrenIds);
+const handleExpandBranch = async (args) =>
+  await expandChildBranch(args.id, args.childrenIds);
 const handleCollapseBranch = (id) => collapseChildBranch(id);
 const handleShowRemainingChildren = async (parentId) => {
   const marker = nodes.value.find((node) => node.id === `more-${parentId}`);
@@ -267,8 +356,22 @@ const handleShowRemainingChildren = async (parentId) => {
 };
 
 const hotReloadWorkspaceId = (personProps) => {
-  router.push({ name: 'profile', params: { id: personProps.id } });
+  router.push({ name: "profile", params: { id: personProps.id } });
 };
 
-const formatYear = (dateStr) => dateStr ? new Date(dateStr).getFullYear() : '???';
+const formatYear = (dateStr) =>
+  dateStr ? new Date(dateStr).getFullYear() : "???";
 </script>
+
+<!-- detailedBiography is v-html'd admin-authored content, not our own
+     markup, so it can carry its own inline styles (see the long comment on
+     the .rich-text-content div above). This is the one place in this file
+     that still needs plain CSS rather than a utility class: Tailwind has no
+     way to say "force !important on every descendant carrying its own
+     inline color", since the whole point is overriding something the
+     content itself set, not something we authored with a class. -->
+<style scoped>
+.rich-text-content :deep([style*="color"]) {
+  color: inherit !important;
+}
+</style>

@@ -81,6 +81,19 @@ onMounted(async () => {
           ["clean"],
         ],
       },
+      // Whitelists exactly the formats the toolbar above can produce. There's
+      // no color picker here, so any color/background formatting that shows
+      // up is unintended — almost always carried in on a paste from Word,
+      // Google Docs, or a web page, which happily brings along a literal
+      // `style="color: rgb(0, 0, 0)"` on its spans. This stops Quill's own
+      // paste/typing pipeline from ever recording that formatting going
+      // forward. It does NOT retroactively strip inline colors already
+      // baked into an existing record's saved HTML — that gets loaded via a
+      // direct `innerHTML` assignment below, bypassing Quill's format
+      // filtering entirely — which is why the CSS rule in this file's
+      // <style> block (search "style*=") exists too, to neutralize those at
+      // display time.
+      formats: ["header", "bold", "italic", "underline", "list", "blockquote", "link"],
     });
     if (props.modelValue) quill.root.innerHTML = props.modelValue;
     quill.on("text-change", () => {
@@ -145,6 +158,18 @@ onBeforeUnmount(() => {
 }
 [data-theme="dark"] .richtext-host :deep(.ql-editor) {
   color: var(--color-slate-100);
+}
+/* Content loaded into the editor (an existing record's saved HTML, set via
+   a direct `innerHTML` assignment rather than through Quill's own
+   paste/typing pipeline — see the `formats` option above) can carry a
+   literal inline `style="color: ..."` on individual spans, most often a
+   fixed black left over from a Word/Google Docs paste. An element's own
+   inline style always wins over any class-based rule, however specific, so
+   the only way to override it here is `!important`. `color: inherit`
+   deliberately doesn't force one flat color — it lets each span fall back
+   to whatever this dark theme already correctly set on its container. */
+[data-theme="dark"] .richtext-host :deep(.ql-editor [style*="color"]) {
+  color: inherit !important;
 }
 [data-theme="dark"] .richtext-host :deep(.ql-editor.ql-blank::before) {
   color: var(--color-slate-500);

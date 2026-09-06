@@ -26,11 +26,11 @@
           to="/create-lineage"
           >Create a lineage</RouterLink
         >
-        <RouterLink
+        <!-- <RouterLink
           class="rounded-full border border-[#b8c4b7] px-3.5 py-2.5 font-sans text-[0.86rem] font-semibold text-forest-900 no-underline dark:border-slate-700 dark:text-slate-100"
           to="/login"
           >Admin sign in</RouterLink
-        >
+        > -->
         <ThemeToggle />
       </div>
     </nav>
