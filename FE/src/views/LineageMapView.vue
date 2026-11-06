@@ -288,6 +288,16 @@
         <span aria-hidden="true">🌿</span>
         <span v-if="edgeControlExpanded">Connector style</span>
       </button>
+      <label v-if="edgeControlExpanded" class="flex flex-col items-stretch gap-1 px-3 text-[0.7rem] font-semibold text-stone-500 dark:text-slate-400">
+        Layout
+        <select
+          v-model="layoutMode"
+          class="px-2 py-1.5 border border-stone-300 rounded-lg bg-white text-forest-900 font-sans font-semibold text-[0.78rem] dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
+        >
+          <option value="spread">Spread (wide rows)</option>
+          <option value="branches">Branches (compact tree)</option>
+        </select>
+      </label>
       <label v-if="edgeControlExpanded" class="flex items-center px-3 pb-3">
         <select
           v-model="edgeStyle"
@@ -390,6 +400,15 @@ const EDGE_STYLE_OPTIONS = [
   { value: "straight", label: "Straight" },
 ];
 const edgeStyle = ref("branch");
+const LAYOUT_KEY = "agburu-map-layout";
+const readLayout = () => {
+  try {
+    return localStorage.getItem(LAYOUT_KEY) === "branches" ? "branches" : "spread";
+  } catch {
+    return "spread";
+  }
+};
+const layoutMode = ref(readLayout());
 const edgeControlExpanded = ref(false);
 
 const GESTURE_HINT_KEY = "agburu-map-gesture-hint-dismissed";
@@ -522,8 +541,29 @@ const layout = (people, relationships) => {
     // A taller row height gives each branch's curve room to arc gracefully
     // before it reaches the next generation, instead of bunching right
     // under the parent node.
-    tree().nodeSize([320, 230])(root);
+    // "Spread" keeps every generation on one clean row. "Branches" packs big
+    // families into a narrower upside-down tree: siblings sit closer together
+    // and alternate between two heights so cards can interleave like branches.
+    const compact = layoutMode.value === "branches";
+    if (compact) {
+      tree()
+        .nodeSize([300, 250])
+        .separation((a, b) => (a.parent === b.parent ? 0.5 : 1))(root);
+    } else {
+      tree().nodeSize([320, 230])(root);
+    }
+    const STAGGER = 125;
+    const offsets = new Map();
     root.descendants().forEach((node) => {
+      const parent = node.parent;
+      if (!compact || !parent) return offsets.set(node, 0);
+      const siblings = parent.children;
+      const stagger =
+        siblings.length >= 3 ? (siblings.indexOf(node) % 2) * STAGGER : 0;
+      offsets.set(node, offsets.get(parent) + stagger);
+    });
+    root.descendants().forEach((node) => {
+      node.y += offsets.get(node);
       if (node.data.moreMarker) {
         moreMarkers.push({
           parentId: node.data.parentId,
@@ -686,6 +726,17 @@ onBeforeUnmount(() => clearTimeout(gestureHintTimer));
 // dropdown swaps the connector style live, without a page reload.
 watch(edgeStyle, () => {
   if (rawPeople.value.length) layout(rawPeople.value, rawRelationships.value);
+});
+
+watch(layoutMode, async (mode) => {
+  try {
+    localStorage.setItem(LAYOUT_KEY, mode);
+  } catch {
+    // Storage blocked — the choice just won't be remembered.
+  }
+  if (!rawPeople.value.length) return;
+  await relayout();
+  await frameTree();
 });
 
 const openProfile = (person) => {
