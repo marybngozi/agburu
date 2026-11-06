@@ -1,7 +1,7 @@
 import express from 'express';
 import {
   addLineageMember, approveLineage, createRelationship, getLineageTree, listAdminLineages, listLineageMembers, listMyLineages, listPendingLineages, listPublicLineages,
-  reorderChildren, requestLineage, setRootMember
+  quickAddPerson, reorderChildren, requestLineage, setRootMember
 } from '../controllers/lineageController.js';
 import { optionalProtect, protect, requireLineageOwnerOrAdmin, requirePlatformAdmin } from '../middleware/authMiddleware.js';
 
@@ -23,6 +23,7 @@ router.patch('/admin/:id/approve', protect, requirePlatformAdmin, approveLineage
 // own content.
 router.get('/:lineageId/members', protect, requireLineageOwnerOrAdmin, listLineageMembers);
 router.post('/:lineageId/members', protect, requireLineageOwnerOrAdmin, addLineageMember);
+router.post('/:lineageId/quick-add', protect, requireLineageOwnerOrAdmin, quickAddPerson);
 router.post('/:lineageId/relationships', protect, requireLineageOwnerOrAdmin, createRelationship);
 router.patch('/:lineageId/members/:memberId/root', protect, requireLineageOwnerOrAdmin, setRootMember);
 router.patch('/:lineageId/parents/:parentPersonId/children-order', protect, requireLineageOwnerOrAdmin, reorderChildren);

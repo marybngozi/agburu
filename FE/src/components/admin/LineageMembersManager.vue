@@ -1,12 +1,79 @@
 <template>
   <div>
-    <h3 ref="addPersonSectionRef">Add a person</h3>
-    <p class="text-slate-500 text-[0.85rem] mt-0.8 mb-3 dark:text-slate-400">
-      Search for an existing person — including one already in this
-      lineage but still "Not yet connected" — or create a new one and
-      come back here. Either way, choose how they connect to the family
-      so they never sit unconnected.
-    </p>
+    <section class="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
+      <h3 class="m-0 text-base font-semibold">
+        {{ members.length ? "Quick add a relative" : "Start the tree" }}
+      </h3>
+      <p class="mt-1 mb-3 text-[0.85rem] text-slate-500 dark:text-slate-400">
+        <template v-if="members.length">
+          Pick who they're related to, say how, and type their name. They're created, added to
+          this lineage and connected in one step.
+        </template>
+        <template v-else>Add the first person. They become the root of the map.</template>
+      </p>
+      <form @submit.prevent="submitQuickAdd" class="grid gap-3">
+        <div v-if="members.length" class="grid gap-3 sm:grid-cols-[1fr_auto]">
+          <label class="grid gap-1 text-[0.72rem] font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">
+            Related to
+            <SearchableSelect v-model="quick.anchor" :options="memberOptions" placeholder="Select member" />
+          </label>
+          <div class="grid gap-1 text-[0.72rem] font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">
+            They are their
+            <div class="flex overflow-hidden rounded-md border border-slate-300 dark:border-slate-600">
+              <button
+                v-for="option in QUICK_OPTIONS"
+                :key="option.value"
+                type="button"
+                @click="quick.relation = option.value"
+                :class="[
+                  'px-3 py-1.5 text-sm normal-case font-medium',
+                  quick.relation === option.value
+                    ? 'bg-slate-900 text-white dark:bg-slate-600'
+                    : 'bg-white text-slate-700 dark:bg-slate-800 dark:text-slate-100',
+                ]"
+              >
+                {{ option.label }}
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="grid gap-3 sm:grid-cols-[1fr_auto_auto]">
+          <input
+            v-model="quick.name"
+            required
+            maxlength="200"
+            placeholder="Full name"
+            class="field-input"
+          />
+          <div class="flex items-center gap-4 text-sm">
+            <label class="flex items-center gap-1 cursor-pointer"><input type="radio" v-model="quick.gender" value="male" /> Male</label>
+            <label class="flex items-center gap-1 cursor-pointer"><input type="radio" v-model="quick.gender" value="female" /> Female</label>
+          </div>
+          <input v-model="quick.birthDate" type="date" title="Birth date (optional)" class="field-input" />
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <button
+            type="submit"
+            :disabled="quickSaving || (members.length && !quick.anchor)"
+            class="rounded-md bg-slate-900 px-4 py-2 text-sm text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-700 dark:hover:bg-slate-600"
+          >
+            {{ quickSaving ? "Adding…" : quickLabel }}
+          </button>
+          <span v-if="quickMessage" class="text-sm text-emerald-700 dark:text-emerald-400">{{ quickMessage }}</span>
+          <span class="text-xs text-slate-500 dark:text-slate-400">Add details and a photo later from the Edit link.</span>
+        </div>
+      </form>
+    </section>
+
+    <details class="mt-6" :open="!!(newPerson || pinnedPerson)">
+      <summary class="cursor-pointer text-base font-semibold" ref="addPersonSectionRef">
+        Add someone who already exists
+      </summary>
+      <p class="text-slate-500 text-[0.85rem] mt-2 mb-3 dark:text-slate-400">
+        Search for an existing person — including one already in this
+        lineage but still "Not yet connected" — or create a new one with the full form and come
+        back here.
+      </p>
     <div class="flex flex-wrap items-center gap-2.4">
       <input
         v-model="search"
@@ -104,8 +171,10 @@
       </div>
     </div>
 
+    </details>
+
     <hr class="border-0 border-t border-slate-200 my-6 dark:border-slate-800" />
-    <h3>Reorder children</h3>
+    <h3 class="font-semibold">Reorder children</h3>
     <p class="text-slate-500 text-[0.85rem] mt-0.8 mb-3 dark:text-slate-400">
       Pick a parent, then drag their children — or use the arrows — into
       the order they should appear on the family map. Changes stay on this
@@ -182,7 +251,7 @@
     </div>
 
     <hr class="border-0 border-t border-slate-200 my-6 dark:border-slate-800" />
-    <h3>Members</h3>
+    <h3 class="font-semibold">Members</h3>
     <p v-if="!members.length">
       Add a person below, then select them as the root.
     </p>
@@ -318,6 +387,19 @@ const memberPage = ref(1);
 const MEMBER_PAGE_LIMIT = 8;
 let timer;
 
+const QUICK_OPTIONS = [
+  { value: "child", label: "Child" },
+  { value: "spouse", label: "Spouse" },
+  { value: "parent", label: "Parent" },
+];
+const quick = reactive({ anchor: "", relation: "child", name: "", gender: "male", birthDate: "" });
+const quickSaving = ref(false);
+const quickMessage = ref("");
+const quickLabel = computed(() => {
+  if (!members.value.length) return "Add as root";
+  return `Add ${quick.relation}`;
+});
+
 const memberOptions = computed(() =>
   members.value
     .filter((member) => member.personId?._id)
@@ -416,6 +498,13 @@ const onConnectAsChange = (personId) => {
 const load = async () => {
   members.value = await api.getLineageMembers(props.lineage._id);
   tree.value = await api.getLineageTree(props.lineage.slug);
+  // Default "Related to" to the root (or the first member) so the common
+  // case is just: type a name, click Add.
+  const stillThere = members.value.some((m) => m.personId?._id === quick.anchor);
+  if (!stillThere) {
+    const fallback = members.value.find((m) => m.isRoot) || members.value[0];
+    quick.anchor = fallback?.personId?._id || "";
+  }
 };
 
 const searchPeople = () => {
@@ -496,6 +585,31 @@ const addMember = async (personId) => {
     results.value = [];
   } finally {
     delete isSubmitting[personId];
+  }
+};
+
+const submitQuickAdd = async () => {
+  error.value = "";
+  quickMessage.value = "";
+  quickSaving.value = true;
+  try {
+    const isFirst = !members.value.length;
+    const result = await api.quickAddPerson(props.lineage._id, {
+      relation: isFirst ? "root" : quick.relation,
+      anchorPersonId: isFirst ? undefined : quick.anchor,
+      person: { name: quick.name, gender: quick.gender, birthDate: quick.birthDate },
+    });
+    quickMessage.value = `Added ${result.person.name}.`;
+    // Keep the anchor and relation so several siblings/children can be added
+    // in a row; a spouse or parent usually means moving on, so reset the type.
+    quick.name = "";
+    quick.birthDate = "";
+    await load();
+    if (isFirst) quick.anchor = result.person._id;
+  } catch (requestError) {
+    error.value = requestError.message;
+  } finally {
+    quickSaving.value = false;
   }
 };
 

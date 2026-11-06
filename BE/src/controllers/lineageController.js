@@ -223,3 +223,73 @@ export const reorderChildren = async (req, res) => {
     await session.endSession();
   }
 };
+
+// One-step "add a relative": creates the person, puts them in this lineage and
+// connects them to an existing member — so nobody is ever left unconnected.
+// Not transactional (works on a standalone Mongo too); if a later step fails
+// the earlier ones are removed again so no orphans are left behind.
+const QUICK_RELATIONS = ['child', 'parent', 'spouse', 'root'];
+export const quickAddPerson = async (req, res) => {
+  const created = { personId: null, memberId: null };
+  try {
+    const { relation, anchorPersonId, person: input } = req.body || {};
+    if (!QUICK_RELATIONS.includes(relation)) return res.status(400).json({ message: 'Choose child, parent or spouse' });
+    if (!input || typeof input !== 'object' || typeof input.name !== 'string' || !input.name.trim()) {
+      return res.status(400).json({ message: 'A name is required' });
+    }
+    if (!['male', 'female'].includes(input.gender)) return res.status(400).json({ message: 'Gender is required' });
+
+    const lineage = await Lineage.findById(req.params.lineageId);
+    if (!lineage) return res.status(404).json({ message: 'Lineage not found' });
+    if (lineage.status !== 'approved') return res.status(400).json({ message: 'This lineage is not approved yet' });
+
+    const memberCount = await LineageMember.countDocuments({ lineageId: lineage._id, isDeleted: false });
+    if (relation === 'root') {
+      if (memberCount) return res.status(400).json({ message: 'This lineage already has members' });
+    } else {
+      if (!mongoose.isValidObjectId(anchorPersonId)) return res.status(400).json({ message: 'Choose who they are related to' });
+      const anchor = await LineageMember.exists({ lineageId: lineage._id, personId: anchorPersonId, isDeleted: false });
+      if (!anchor) return res.status(400).json({ message: 'That person is not in this lineage' });
+    }
+
+    const clean = (value, max) => (typeof value === 'string' ? value.trim().slice(0, max) : '');
+    const person = await Person.create({
+      name: clean(input.name, 200),
+      gender: input.gender,
+      title: clean(input.title, 200),
+      titledName: clean(input.titledName, 200),
+      birthDate: clean(input.birthDate, 40),
+      createdBy: req.user._id
+    });
+    created.personId = person._id;
+
+    const member = await LineageMember.create({
+      lineageId: lineage._id,
+      personId: person._id,
+      modeOfJoining: relation === 'spouse' ? 'married' : 'birthed',
+      isRoot: relation === 'root'
+    });
+    created.memberId = member._id;
+
+    if (relation !== 'root') {
+      const base = { lineageId: lineage._id };
+      if (relation === 'child') {
+        const childOrder = await Relationship.countDocuments({ ...base, type: 'parent_child', parentPersonId: anchorPersonId });
+        await Relationship.create({ ...base, type: 'parent_child', parentPersonId: anchorPersonId, childPersonId: person._id, childOrder });
+      } else if (relation === 'parent') {
+        const childOrder = await Relationship.countDocuments({ ...base, type: 'parent_child', parentPersonId: person._id });
+        await Relationship.create({ ...base, type: 'parent_child', parentPersonId: person._id, childPersonId: anchorPersonId, childOrder });
+      } else {
+        await Relationship.create({ ...base, type: 'marriage', personIds: [anchorPersonId, person._id] });
+      }
+    }
+
+    await AuditLog.create({ actorId: req.user._id, action: 'lineage.quick_add', entityType: 'Person', entityId: person._id });
+    res.status(201).json({ person, memberId: member._id });
+  } catch (error) {
+    if (created.memberId) await LineageMember.deleteOne({ _id: created.memberId }).catch(() => {});
+    if (created.personId) await Person.deleteOne({ _id: created.personId }).catch(() => {});
+    const status = error.name === 'ValidationError' ? 400 : 500;
+    res.status(status).json({ message: error.message });
+  }
+};
