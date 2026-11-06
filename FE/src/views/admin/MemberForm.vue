@@ -1,6 +1,6 @@
 <template>
   <AppShell>
-  <div class="max-w-212.5 mx-auto my-8 px-4 font-sans">
+  <div class="max-w-285 mx-auto my-8 px-4 font-sans">
     <div class="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between mb-8">
       <h2>{{ isEditMode ? 'Edit Person Profile' : 'Add New Person' }}</h2>
       <button
@@ -11,7 +11,8 @@
       </button>
     </div>
 
-    <form @submit.prevent="handleSubmit" class="flex flex-col gap-8">
+    <div class="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
+    <form @submit.prevent="handleSubmit" class="flex min-w-0 flex-col gap-8">
       <!-- SECTION A: Identity & Demographics -->
       <div class="bg-white border border-slate-200 p-5 sm:p-8 rounded-lg shadow-sm dark:bg-slate-900 dark:border-slate-800">
         <h3 class="mt-0 mb-1 text-slate-900 dark:text-slate-100">About this person</h3>
@@ -94,6 +95,21 @@
         </button>
       </div>
     </form>
+
+    <aside class="lg:sticky lg:top-6">
+      <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+        Live preview · how they appear on the map
+      </p>
+      <CustomNode :data="previewData" class="pointer-events-none" />
+      <div class="mt-4 rounded-lg border border-slate-200 bg-white p-4 text-sm dark:border-slate-800 dark:bg-slate-900">
+        <p class="m-0 font-semibold text-slate-900 dark:text-slate-100">{{ form.name || "Full name" }}</p>
+        <p class="mt-1 mb-0 text-slate-500 dark:text-slate-400">{{ lifespan }}</p>
+        <p class="mt-3 mb-0 text-slate-700 dark:text-slate-300">
+          {{ form.biographySummary || "The summary shown in the quick-view popup appears here." }}
+        </p>
+      </div>
+    </aside>
+    </div>
   </div>
   </AppShell>
 </template>
@@ -101,7 +117,8 @@
 <script setup>
 import AppShell from '@/components/ui/AppShell.vue';
 import { api } from '@/api';
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
+import CustomNode from '@/components/canvas/CustomNode.vue';
 import { useRoute, useRouter } from 'vue-router';
 import MilestoneInput from '@/components/admin/MilestoneInput.vue';
 import RichTextEditor from '@/components/ui/RichTextEditor.vue';
@@ -135,6 +152,22 @@ const form = reactive({
   profilePicture: '',
   milestones: [],
   isDeleted: false
+});
+
+const previewData = computed(() => ({
+  name: form.name || 'Full name',
+  title: form.title,
+  titledName: form.titledName,
+  gender: form.gender,
+  profilePicture: imagePreview.value || '',
+  partnerIds: [],
+}));
+const lifespan = computed(() => {
+  const year = (d) => (d ? String(d).slice(0, 4) : '');
+  const born = year(form.birthDate);
+  const died = year(form.deathDate);
+  if (!born && !died) return 'Dates not set';
+  return `${born || '?'} — ${died || 'Present'}`;
 });
 
 // File Management

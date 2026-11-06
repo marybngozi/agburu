@@ -48,28 +48,65 @@
         >
       </button>
       <div v-if="panelExpanded">
-        <p
-          class="mt-1.4 mb-0 text-forest-800 text-[0.85rem] leading-[1.45] font-serif dark:text-slate-100"
-          :class="{ 'line-clamp-3': isStoryLong && !storyExpanded }"
-        >
-          {{ storyText }}
-        </p>
-        <button
-          v-if="isStoryLong"
-          type="button"
-          class="mt-1.8 p-0 bg-transparent border-0 text-forest-700 text-[0.72rem] font-bold font-sans cursor-pointer hover:text-forest-900 hover:underline dark:text-clay-400 dark:hover:text-clay-300"
-          @click="storyExpanded = !storyExpanded"
-        >
-          {{ storyExpanded ? "Show less" : "Read full story" }}
-        </button>
+        <template v-if="editingStory">
+          <textarea
+            v-model="storyDraft"
+            rows="6"
+            maxlength="3000"
+            class="field-input mt-2 w-full"
+            placeholder="Tell the story of this family…"
+          ></textarea>
+          <div class="mt-2 flex items-center gap-2">
+            <button
+              type="button"
+              :disabled="savingStory"
+              class="rounded-md bg-forest-900 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+              @click="saveStory"
+            >
+              {{ savingStory ? "Saving…" : "Save story" }}
+            </button>
+            <button type="button" class="border-0 bg-transparent text-xs font-semibold text-stone-500" @click="editingStory = false">Cancel</button>
+          </div>
+        </template>
+        <template v-else>
+          <p
+            class="mt-1.4 mb-0 text-forest-800 text-[0.85rem] leading-[1.45] font-serif dark:text-slate-100"
+            :class="{ 'line-clamp-3': isStoryLong && !storyExpanded }"
+          >
+            {{ storyText }}
+          </p>
+          <div class="mt-1.8 flex items-center gap-3">
+            <button
+              v-if="isStoryLong"
+              type="button"
+              class="p-0 bg-transparent border-0 text-forest-700 text-[0.72rem] font-bold font-sans cursor-pointer hover:text-forest-900 hover:underline dark:text-clay-400 dark:hover:text-clay-300"
+              @click="storyExpanded = !storyExpanded"
+            >
+              {{ storyExpanded ? "Show less" : "Read full story" }}
+            </button>
+            <button
+              v-if="lineage.canManage"
+              type="button"
+              class="p-0 bg-transparent border-0 text-forest-700 text-[0.72rem] font-bold font-sans cursor-pointer hover:underline dark:text-clay-400"
+              @click="startEditStory"
+            >
+              ✎ Edit story
+            </button>
+          </div>
+        </template>
       </div>
     </aside>
 
     <aside
       v-if="unconnectedPeople.length"
-      class="absolute z-5 top-auto right-2 bottom-2 md:top-23.2 md:right-4 md:bottom-auto w-[min(270px,calc(100vw-1rem))] md:w-67.5 p-3.6 bg-sand-50/95 border border-stone-200 rounded-xl shadow-[0_8px_26px_rgba(23,53,45,0.05)] dark:bg-slate-900 dark:border-slate-800 dark:shadow-[0_8px_26px_rgba(0,0,0,0.5)]"
+      class="absolute z-5 top-auto left-2 bottom-16 md:top-23.2 md:left-auto md:right-4 md:bottom-auto w-[min(270px,calc(100vw-1rem))] md:w-67.5 p-3.6 bg-sand-50/95 border border-stone-200 rounded-xl shadow-[0_8px_26px_rgba(23,53,45,0.05)] dark:bg-slate-900 dark:border-slate-800 dark:shadow-[0_8px_26px_rgba(0,0,0,0.5)]"
     >
-      <div class="flex items-center justify-between">
+      <button
+        type="button"
+        class="flex w-full items-center justify-between border-0 bg-transparent p-0 text-left cursor-pointer"
+        :aria-expanded="unconnectedExpanded"
+        @click="unconnectedExpanded = !unconnectedExpanded"
+      >
         <div>
           <span
             class="block text-[0.65rem] font-extrabold tracking-[0.09em] uppercase text-sand-700 dark:text-clay-400"
@@ -85,7 +122,8 @@
           class="badge justify-center min-w-5.6 bg-clay-100 text-sand-800 dark:bg-slate-800 dark:text-clay-300"
           >{{ unconnectedPeople.length }}</span
         >
-      </div>
+      </button>
+      <template v-if="unconnectedExpanded">
       <p
         class="mt-2.2 mb-2.8 text-[0.72rem] leading-[1.4] text-stone-500 dark:text-slate-400"
       >
@@ -118,7 +156,7 @@
             >
           </button>
           <button
-            v-if="isAdmin"
+            v-if="lineage.canManage"
             type="button"
             class="shrink-0 px-2.2 py-1.6 border border-clay-600 rounded-lg bg-sand-50 text-clay-600 text-[0.68rem] font-bold cursor-pointer hover:bg-clay-600 hover:text-white dark:bg-slate-800 dark:border-clay-400 dark:text-clay-400 dark:hover:bg-clay-400 dark:hover:text-white"
             title="Connect this person to the family tree"
@@ -128,6 +166,7 @@
           </button>
         </div>
       </div>
+      </template>
     </aside>
 
     <div
@@ -144,11 +183,11 @@
       :edge-types="edgeTypes"
       :min-zoom="0.15"
       :max-zoom="1.5"
-      :fit-view-on-init="!isMobileViewport"
+      
       @node-click="handleNodeClick"
     >
       <template #node-custom="nodeProps">
-        <CustomNode v-bind="nodeProps" @show-info="openProfile" />
+        <CustomNode v-bind="nodeProps" @show-info="openProfile" @quick-add="openQuickAdd" />
       </template>
       <template #node-seeMore="nodeProps">
         <SeeMoreNode
@@ -160,6 +199,18 @@
         <BranchEdge v-bind="edgeProps" />
       </template>
     </VueFlow>
+    <div
+      v-if="lineage && lineage.canManage && !rawPeople.length"
+      class="absolute inset-0 z-5 grid place-items-center pointer-events-none"
+    >
+      <div class="pointer-events-auto rounded-xl border border-stone-200 bg-sand-50/95 p-6 text-center shadow-lg dark:border-slate-800 dark:bg-slate-900">
+        <p class="m-0 font-serif text-lg font-bold text-forest-900 dark:text-slate-100">This map is empty</p>
+        <p class="mt-1 mb-4 text-sm text-stone-500 dark:text-slate-400">Start with the oldest person you know of.</p>
+        <button type="button" class="cursor-pointer rounded-md border-0 bg-forest-900 px-4 py-2 text-sm font-semibold text-white" @click="quickAdd = { anchor: null, relation: 'root' }">
+          + Add the first person
+        </button>
+      </div>
+    </div>
     <div
       v-if="showGestureHint"
       class="absolute z-10 left-1/2 bottom-4 -translate-x-1/2 flex items-center gap-2 max-w-[calc(100vw-1.5rem)] pl-3.4 pr-2 py-2.2 bg-forest-900/92 text-sand-100 rounded-full shadow-[0_8px_20px_rgba(0,0,0,0.25)]"
@@ -174,6 +225,39 @@
         aria-label="Dismiss hint"
       >
         ×
+      </button>
+    </div>
+    <div v-if="lineage && rawPeople.length" class="absolute z-10 left-2 bottom-2 md:left-4 md:bottom-4 flex items-end gap-2">
+      <div class="relative">
+        <input
+          v-model="treeSearch"
+          type="search"
+          placeholder="Find a person…"
+          class="w-44 rounded-[10px] border border-stone-200 bg-sand-50/95 px-3 py-2 font-sans text-[0.8rem] text-forest-900 shadow-[0_8px_20px_rgba(0,0,0,0.1)] md:w-56 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
+          @keydown.enter.prevent="searchResults[0] && goToPerson(searchResults[0])"
+        />
+        <ul
+          v-if="treeSearch.trim() && searchResults.length"
+          class="absolute bottom-full left-0 mb-1 max-h-60 w-full list-none overflow-y-auto rounded-lg border border-stone-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900"
+        >
+          <li v-for="person in searchResults" :key="person.id">
+            <button
+              type="button"
+              class="w-full cursor-pointer truncate rounded border-0 bg-transparent px-2.5 py-1.8 text-left text-[0.8rem] text-forest-900 hover:bg-stone-100 dark:text-slate-100 dark:hover:bg-slate-800"
+              @click="goToPerson(person)"
+            >
+              {{ person.name }}
+            </button>
+          </li>
+        </ul>
+      </div>
+      <button
+        type="button"
+        class="cursor-pointer rounded-[10px] border border-stone-200 bg-sand-50/95 px-3 py-2 font-sans text-[0.8rem] font-semibold text-forest-900 shadow-[0_8px_20px_rgba(0,0,0,0.1)] hover:border-stone-300 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
+        title="Centre the map on the root"
+        @click="centerOnRoot(isMobileViewport ? 0.55 : 0.75)"
+      >
+        ⌂ Root
       </button>
     </div>
     <div
@@ -219,6 +303,14 @@
         </select>
       </label>
     </div>
+    <QuickAddModal
+      v-if="quickAdd"
+      :lineage-id="lineage.id"
+      :anchor="quickAdd.anchor"
+      :initial-relation="quickAdd.relation === 'root' ? 'child' : quickAdd.relation"
+      @close="quickAdd = null"
+      @added="onQuickAdded"
+    />
     <BaseModal
       v-if="selectedPerson"
       :active-person="selectedPerson"
@@ -245,12 +337,13 @@ import CustomNode from "@/components/canvas/CustomNode.vue";
 import SeeMoreNode from "@/components/canvas/SeeMoreNode.vue";
 import BranchEdge from "@/components/canvas/BranchEdge.vue";
 import BaseModal from "@/components/ui/BaseModal.vue";
+import QuickAddModal from "@/components/ui/QuickAddModal.vue";
 import ThemeToggle from "@/components/ui/ThemeToggle.vue";
 import { setPageTitle, withSiteSuffix } from "@/composables/useDocumentMeta";
 
 const props = defineProps({ slug: { type: String, required: true } });
 const router = useRouter();
-const { setViewport } = useVueFlow();
+const { setViewport, fitView } = useVueFlow();
 const nodes = ref([]);
 const edges = ref([]);
 const lineage = ref(null);
@@ -262,6 +355,15 @@ const rawRelationships = ref([]);
 const expandedParentIds = ref(new Set());
 const storyExpanded = ref(false);
 const panelExpanded = ref(true);
+const unconnectedExpanded = ref(
+  typeof window === "undefined" || window.innerWidth > 720,
+);
+const quickAdd = ref(null);
+const highlightId = ref(null);
+const treeSearch = ref("");
+const editingStory = ref(false);
+const storyDraft = ref("");
+const savingStory = ref(false);
 const nodeTypes = {
   custom: markRaw(CustomNode),
   seeMore: markRaw(SeeMoreNode),
@@ -312,7 +414,6 @@ const storyText = computed(
     `The history and story of this lineage will appear here.`,
 );
 const isStoryLong = computed(() => storyText.value.length > 220);
-const isAdmin = computed(() => !!localStorage.getItem("token"));
 
 const layout = (people, relationships) => {
   const connectedIds = new Set();
@@ -464,6 +565,8 @@ const layout = (people, relationships) => {
           data: {
             ...person,
             partnerIds: [...partnersByPersonId.get(person.id)],
+            canManage: !!lineage.value?.canManage,
+            highlight: person.id === highlightId.value,
           },
           position: { x: point.x - 130, y: point.y - 58 },
         };
@@ -506,17 +609,14 @@ const layout = (people, relationships) => {
   ];
 };
 
-// A phone-width viewport is too narrow to fit-view a wide family tree
-// without hitting the min-zoom floor and clipping nodes off both edges —
-// instead of shrinking the whole tree to fit, center on just the root (and
-// the generation right below it) at a fixed, legible zoom, and let people
-// pinch/pan from there.
-const centerOnRootForMobile = async () => {
-  if (!isMobileViewport || !primaryRootId.value) return;
+// A big family tree fit into the screen shrinks to the min-zoom floor and
+// becomes unreadable (and on a phone it clips nodes off both edges). Instead
+// centre on the root at a legible zoom and let people pan/pinch from there.
+const centerOnRoot = async (zoom = 0.75) => {
+  if (!primaryRootId.value) return;
   await nextTick();
   const rootNode = nodes.value.find((node) => node.id === primaryRootId.value);
   if (!rootNode) return;
-  const zoom = 0.55;
   const nodeCenterX = rootNode.position.x + 130;
   const nodeCenterY = rootNode.position.y + 58;
   setViewport(
@@ -529,6 +629,37 @@ const centerOnRootForMobile = async () => {
   );
 };
 
+const SMALL_TREE_NODES = 20;
+const frameTree = async () => {
+  await nextTick();
+  if (isMobileViewport) return centerOnRoot(0.55);
+  if (nodes.value.length <= SMALL_TREE_NODES) return fitView({ padding: 0.2, duration: 300 });
+  return centerOnRoot(0.75);
+};
+
+// Vue Flow keeps a node's old `data` when a node with the same id comes back
+// in v-model, so after the data changes (new spouse, highlight) clear the
+// canvas for one tick and lay it out again.
+const relayout = async () => {
+  nodes.value = [];
+  edges.value = [];
+  await nextTick();
+  layout(rawPeople.value, rawRelationships.value);
+};
+
+const loadTree = async () => {
+  const data = await api.getLineageTree(props.slug);
+  if (!data.people) throw new Error(data.message || "Lineage unavailable");
+  lineage.value = data.lineage;
+  setPageTitle(
+    withSiteSuffix(data.lineage?.name),
+    data.lineage?.description || undefined,
+  );
+  rawPeople.value = data.people;
+  rawRelationships.value = data.relationships;
+  await relayout();
+};
+
 onMounted(async () => {
   try {
     if (isMobileViewport) {
@@ -539,17 +670,8 @@ onMounted(async () => {
         gestureHintDismissed.value = false;
       }
     }
-    const data = await api.getLineageTree(props.slug);
-    if (!data.people) throw new Error(data.message || "Lineage unavailable");
-    lineage.value = data.lineage;
-    setPageTitle(
-      withSiteSuffix(data.lineage?.name),
-      data.lineage?.description || undefined,
-    );
-    rawPeople.value = data.people;
-    rawRelationships.value = data.relationships;
-    layout(rawPeople.value, rawRelationships.value);
-    await centerOnRootForMobile();
+    await loadTree();
+    await frameTree();
     if (isMobileViewport && !gestureHintDismissed.value) {
       gestureHintTimer = setTimeout(dismissGestureHint, 6000);
     }
@@ -575,10 +697,98 @@ const showRemainingChildren = (parentId) => {
 };
 const connectPerson = (person) => {
   router.push({
-    name: "admin-lineages",
+    name:
+      localStorage.getItem("role") === "lineage_owner"
+        ? "my-lineages"
+        : "admin-lineages",
     query: { lineageId: lineage.value?.id, connectPersonId: person.id },
   });
 };
+const openQuickAdd = ({ person, relation }) => {
+  quickAdd.value = { anchor: person, relation };
+};
+const onQuickAdded = async () => {
+  const wasEmpty = !rawPeople.value.length;
+  quickAdd.value = null;
+  try {
+    await loadTree();
+    if (wasEmpty) await frameTree();
+  } catch (requestError) {
+    error.value = requestError.message;
+  }
+};
+
+const startEditStory = () => {
+  storyDraft.value = lineage.value?.description || "";
+  editingStory.value = true;
+};
+const saveStory = async () => {
+  savingStory.value = true;
+  try {
+    const result = await api.updateLineage(lineage.value.id, { description: storyDraft.value });
+    lineage.value = { ...lineage.value, description: result.description };
+    editingStory.value = false;
+  } finally {
+    savingStory.value = false;
+  }
+};
+
+const searchResults = computed(() => {
+  const query = treeSearch.value.trim().toLowerCase();
+  if (!query) return [];
+  return rawPeople.value
+    .filter((person) => person.name.toLowerCase().includes(query))
+    .slice(0, 8);
+});
+
+// Brings a person into view, even when they're hidden behind a "see more"
+// marker or shown only inside a spouse drawer.
+const goToPerson = async (person) => {
+  treeSearch.value = "";
+  let targetId = person.id;
+  if (!nodes.value.some((node) => node.id === targetId)) {
+    if (person.modeOfJoining === "married") {
+      const marriage = rawRelationships.value.find(
+        (r) => r.type === "marriage" && r.personIds.includes(person.id),
+      );
+      targetId = marriage?.personIds.find((id) => id !== person.id) ?? targetId;
+    }
+    // Expand every ancestor's child list so a capped branch shows them.
+    const next = new Set(expandedParentIds.value);
+    let cursor = targetId;
+    for (let guard = 0; guard < 50; guard++) {
+      const link = rawRelationships.value.find(
+        (r) => r.type === "parent_child" && r.childPersonId === cursor,
+      );
+      if (!link) break;
+      next.add(link.parentPersonId);
+      cursor = link.parentPersonId;
+    }
+    expandedParentIds.value = next;
+  }
+  highlightId.value = targetId;
+  await relayout();
+  await nextTick();
+  const node = nodes.value.find((n) => n.id === targetId);
+  if (!node) {
+    error.value = "";
+    return;
+  }
+  const zoom = 0.9;
+  setViewport(
+    {
+      x: window.innerWidth / 2 - (node.position.x + 130) * zoom,
+      y: window.innerHeight / 2 - (node.position.y + 58) * zoom,
+      zoom,
+    },
+    { duration: 500 },
+  );
+  setTimeout(() => {
+    highlightId.value = null;
+    relayout();
+  }, 3000);
+};
+
 const handleNodeClick = (event) => event.event.preventDefault();
 </script>
 

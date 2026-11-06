@@ -118,6 +118,7 @@ export const api = {
     post(`/lineages/${lineageId}/members`, { personId, modeOfJoining }),
   setLineageRoot: (lineageId, memberId) =>
     patch(`/lineages/${lineageId}/members/${memberId}/root`),
+  updateLineage: (lineageId, data) => patch(`/lineages/${lineageId}`, data),
   quickAddPerson: (lineageId, data) => post(`/lineages/${lineageId}/quick-add`, data),
   createRelationship: (lineageId, data) => post(`/lineages/${lineageId}/relationships`, data),
   reorderChildren: (lineageId, parentPersonId, childIds) =>

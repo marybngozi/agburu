@@ -27,6 +27,9 @@ const canViewFullLineage = async (lineageId, user) => {
   return Boolean(await LineageMember.exists({ lineageId, personId: user.assignedPersonId, isDeleted: false }));
 };
 
+const canManageLineage = (lineage, user) =>
+  Boolean(user) && (user.role === 'platform_admin' || (user.role === 'lineage_owner' && lineage.ownerId?.toString() === user._id.toString()));
+
 // Requires a signed-in account (see the `protect` middleware on this route)
 // so every lineage has a real owner going forward — requesterName/Email
 // free-text fields are gone in favor of the account's own identity.
@@ -89,7 +92,7 @@ export const getLineageTree = async (req, res) => {
     });
     const relationships = await Relationship.find({ lineageId: lineage._id }).sort({ childOrder: 1 }).lean();
     res.json({
-      lineage: { id: lineage._id, name: lineage.name, slug: lineage.slug, description: lineage.description, visibility: lineage.visibility, branding: lineage.branding, fullAccess },
+      lineage: { id: lineage._id, name: lineage.name, slug: lineage.slug, description: lineage.description, visibility: lineage.visibility, branding: lineage.branding, fullAccess, canManage: canManageLineage(lineage, req.user) },
       people: visiblePeople,
       relationships: relationships.map((relationship) => ({ ...relationship, id: relationship._id.toString() }))
     });
@@ -291,5 +294,23 @@ export const quickAddPerson = async (req, res) => {
     if (created.personId) await Person.deleteOne({ _id: created.personId }).catch(() => {});
     const status = error.name === 'ValidationError' ? 400 : 500;
     res.status(status).json({ message: error.message });
+  }
+};
+
+// Lets an owner/admin edit the "Family story" shown on the map.
+export const updateLineage = async (req, res) => {
+  try {
+    const { description } = req.body || {};
+    if (typeof description !== 'string') return res.status(400).json({ message: 'A description is required' });
+    const lineage = await Lineage.findByIdAndUpdate(
+      req.params.lineageId,
+      { $set: { description: description.trim().slice(0, 3000) } },
+      { new: true }
+    );
+    if (!lineage) return res.status(404).json({ message: 'Lineage not found' });
+    await AuditLog.create({ actorId: req.user._id, action: 'lineage.updated', entityType: 'Lineage', entityId: lineage._id });
+    res.json({ id: lineage._id, description: lineage.description });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

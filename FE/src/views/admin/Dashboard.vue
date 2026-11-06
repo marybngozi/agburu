@@ -6,14 +6,14 @@
       class="mb-8 flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between"
     >
       <div>
-        <h2 class="mb-1 text-[1.75rem] text-gray-900 dark:text-slate-100">
-          Agburu Lineage Directory
+        <h2 class="m-0 text-[1.75rem] font-semibold text-gray-900 dark:text-slate-100">
+          People directory
         </h2>
-        <p class="text-[0.95rem] text-gray-500 dark:text-slate-400">
-          Manage family tree records, connections, and historical timelines.
+        <p class="mt-1 text-[0.95rem] text-gray-500 dark:text-slate-400">
+          Every person record you can manage. Connect people to a lineage from Manage Lineages.
         </p>
       </div>
-      <div class="flex w-full flex-wrap items-center gap-3 md:w-auto md:flex-nowrap">
+      <div class="flex w-full flex-wrap items-center gap-3 md:w-auto md:justify-end">
         <button
           @click="$router.push({ name: 'admin-lineages' })"
           class="btn-secondary flex-1 md:flex-none"
@@ -62,6 +62,11 @@
       </div>
     </div>
 
+    <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+      <PaginationSummary :page="currentPage" :limit="PAGE_LIMIT" :total="total" noun="people" />
+      <PaginationControls :page="currentPage" :pages="totalPages" :disabled="isLoading" @update:page="navigatePage" />
+    </div>
+
     <!-- Core Grid Directory Table -->
     <div class="card overflow-x-auto overflow-y-hidden md:overflow-hidden">
       <table class="w-full min-w-180 border-collapse text-left text-[0.9rem] md:min-w-0">
@@ -103,7 +108,7 @@
             v-else
             v-for="member in members"
             :key="member.id"
-            :class="{ 'bg-red-50 dark:bg-red-400/[0.08]': member.isDeleted }"
+            :class="[member.isDeleted ? 'bg-red-50 dark:bg-red-400/[0.08]' : 'hover:bg-slate-50 dark:hover:bg-slate-800/40']"
           >
             <td class="border-b border-gray-100 px-4 py-3.5 text-gray-600 dark:border-slate-800 dark:text-slate-400">
               <img
@@ -143,7 +148,7 @@
                 {{ member.isDeleted ? "Archived" : "Active" }}
               </span>
             </td>
-            <td class="flex justify-end gap-2 border-b border-gray-100 px-4 py-3.5 text-gray-600 dark:border-slate-800 dark:text-slate-400">
+            <td class="border-b border-gray-100 px-4 py-3.5 text-gray-600 dark:border-slate-800 dark:text-slate-400"><div class="flex justify-end gap-2">
               <button
                 @click="editMember(member.id)"
                 class="rounded bg-blue-50 px-3 py-1.4 text-[0.825rem] font-medium text-blue-700"
@@ -165,31 +170,15 @@
               >
                 Restore
               </button>
+              </div>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Standard Numeric Pagination Controls -->
-    <div class="mt-6 flex flex-wrap items-center justify-center gap-3 md:flex-nowrap md:justify-between">
-      <button
-        @click="navigatePage(currentPage - 1)"
-        :disabled="currentPage <= 1 || isLoading"
-        class="cursor-pointer rounded border border-gray-300 bg-white px-4 py-2 text-[0.85rem] disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:disabled:bg-slate-800 dark:disabled:text-slate-500"
-      >
-        ← Previous Page
-      </button>
-      <span class="text-[0.85rem] text-gray-500 dark:text-slate-400"
-        >Page {{ currentPage }} of {{ totalPages || 1 }}</span
-      >
-      <button
-        @click="navigatePage(currentPage + 1)"
-        :disabled="currentPage >= totalPages || isLoading"
-        class="cursor-pointer rounded border border-gray-300 bg-white px-4 py-2 text-[0.85rem] disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:disabled:bg-slate-800 dark:disabled:text-slate-500"
-      >
-        Next Page →
-      </button>
+    <div class="mt-4 flex justify-center">
+      <PaginationControls :page="currentPage" :pages="totalPages" :disabled="isLoading" @update:page="navigatePage" />
     </div>
   </div>
   </AppShell>
@@ -200,11 +189,10 @@ import AppShell from '@/components/ui/AppShell.vue';
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { api } from "@/api";
-import { useAuth } from "@/composables/useAuth";
-import ThemeToggle from "@/components/ui/ThemeToggle.vue";
+import PaginationSummary from "@/components/ui/PaginationSummary.vue";
+import PaginationControls from "@/components/ui/PaginationControls.vue";
 
 const router = useRouter();
-const { logout } = useAuth();
 
 // Core UI States
 const members = ref([]);
@@ -213,7 +201,8 @@ const searchQuery = ref("");
 const showDeleted = ref(false);
 
 // Pagination States
-const PAGE_LIMIT = 8;
+const PAGE_LIMIT = 10;
+const total = ref(0);
 const currentPage = ref(1);
 const totalPages = ref(1);
 
@@ -240,6 +229,7 @@ const fetchMembers = async (page = 1) => {
 
     members.value = res.people || [];
     totalPages.value = res.pages || 1;
+    total.value = res.total ?? members.value.length;
   } catch (err) {
     console.error("Directory query failed:", err);
   } finally {
@@ -282,5 +272,4 @@ const toggleDeleteStatus = async (id, statusToggleValue) => {
 // Routing Actions
 const goToAddMember = () => router.push({ name: "add-member" });
 const editMember = (id) => router.push({ path: `/admin/edit-member/${id}` });
-const handleLogout = async () => await logout();
 </script>

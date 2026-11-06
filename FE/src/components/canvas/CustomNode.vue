@@ -1,7 +1,7 @@
 <template>
   <div
     class="relative box-border w-65 rounded-lg border-t-2 border-r-2 border-b-2 border-t-gray-300 border-r-gray-300 border-b-gray-300 bg-white p-3 font-sans dark:border-t-slate-700 dark:border-r-slate-700 dark:border-b-slate-700 dark:bg-slate-900"
-    :class="[genderBorderClass, nodeShadowClass]"
+    :class="[genderBorderClass, nodeShadowClass, data.highlight && 'ring-4 ring-amber-400']"
   >
     <!-- Node Content Area -->
     <div class="mb-3 flex items-center gap-3">
@@ -47,6 +47,31 @@
       >
         ℹ️ Info
       </button>
+
+      <div v-if="data.canManage" class="relative">
+        <button
+          type="button"
+          class="cursor-pointer rounded bg-emerald-50 px-1.6 py-1 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-300"
+          title="Add a relative"
+          @click.stop="showAddMenu = !showAddMenu"
+        >
+          + Add
+        </button>
+        <div
+          v-if="showAddMenu"
+          class="absolute bottom-full left-0 z-50 mb-1 grid w-28 overflow-hidden rounded-md border border-gray-200 bg-white text-xs shadow-lg dark:border-slate-700 dark:bg-slate-900"
+        >
+          <button
+            v-for="option in ADD_OPTIONS"
+            :key="option.value"
+            type="button"
+            class="cursor-pointer border-0 bg-transparent px-3 py-2 text-left text-gray-800 hover:bg-gray-100 dark:text-slate-100 dark:hover:bg-slate-800"
+            @click.stop="chooseAdd(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        </div>
+      </div>
 
       <button
         v-if="data.partnerIds && data.partnerIds.length"
@@ -96,7 +121,17 @@ const props = defineProps({
   },
 });
 
-defineEmits(["show-info"]);
+const emit = defineEmits(["show-info", "quick-add"]);
+const showAddMenu = ref(false);
+const ADD_OPTIONS = [
+  { value: "child", label: "+ Child" },
+  { value: "spouse", label: "+ Spouse" },
+  { value: "parent", label: "+ Parent" },
+];
+const chooseAdd = (relation) => {
+  showAddMenu.value = false;
+  emit("quick-add", { person: props.data, relation });
+};
 const showSpouseDrawer = ref(false);
 const toggleSpouseDrawer = () => {
   showSpouseDrawer.value = !showSpouseDrawer.value;

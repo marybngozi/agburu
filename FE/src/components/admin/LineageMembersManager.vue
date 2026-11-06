@@ -1,6 +1,6 @@
 <template>
   <div>
-    <section class="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
+    <section v-if="loaded" class="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
       <h3 class="m-0 text-base font-semibold">
         {{ members.length ? "Quick add a relative" : "Start the tree" }}
       </h3>
@@ -252,8 +252,9 @@
 
     <hr class="border-0 border-t border-slate-200 my-6 dark:border-slate-800" />
     <h3 class="font-semibold">Members</h3>
-    <p v-if="!members.length">
-      Add a person below, then select them as the root.
+    <p v-if="!loaded" class="text-slate-500 dark:text-slate-400">Loading members…</p>
+    <p v-else-if="!members.length">
+      Add the first person above to start the tree.
     </p>
     <template v-else>
       <input
@@ -262,6 +263,10 @@
         placeholder="Search members by name"
         class="field-input max-w-80 mb-3"
       />
+      <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <PaginationSummary :page="memberPage" :limit="MEMBER_PAGE_LIMIT" :total="filteredMembers.length" noun="members" />
+        <PaginationControls v-model:page="memberPage" :pages="memberTotalPages" />
+      </div>
       <div class="rounded-lg border border-slate-200 overflow-x-auto [-webkit-overflow-scrolling:touch] sm:overflow-hidden dark:border-slate-800">
         <table class="w-full min-w-120 border-collapse text-left text-[0.9rem]">
           <thead>
@@ -317,26 +322,8 @@
           </tbody>
         </table>
       </div>
-      <div v-if="memberTotalPages > 1" class="flex flex-wrap items-center justify-center gap-2 mt-3 sm:flex-nowrap sm:justify-between">
-        <button
-          type="button"
-          :disabled="memberPage <= 1"
-          @click="memberPage -= 1"
-          class="rounded-[5px] border border-slate-300 bg-white px-2.8 py-1.8 text-sm disabled:opacity-50 disabled:cursor-not-allowed dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
-        >
-          ← Previous
-        </button>
-        <span class="text-[0.85rem] text-slate-500 dark:text-slate-400"
-          >Page {{ memberPage }} of {{ memberTotalPages }}</span
-        >
-        <button
-          type="button"
-          :disabled="memberPage >= memberTotalPages"
-          @click="memberPage += 1"
-          class="rounded-[5px] border border-slate-300 bg-white px-2.8 py-1.8 text-sm disabled:opacity-50 disabled:cursor-not-allowed dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
-        >
-          Next →
-        </button>
+      <div class="mt-3 flex justify-center">
+        <PaginationControls v-model:page="memberPage" :pages="memberTotalPages" />
       </div>
     </template>
   </div>
@@ -353,6 +340,8 @@ import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { api } from "@/api";
 import SearchableSelect from "@/components/ui/SearchableSelect.vue";
+import PaginationSummary from "@/components/ui/PaginationSummary.vue";
+import PaginationControls from "@/components/ui/PaginationControls.vue";
 
 const props = defineProps({
   lineage: { type: Object, required: true },
@@ -366,6 +355,7 @@ const props = defineProps({
 const route = useRoute();
 
 const members = ref([]);
+const loaded = ref(false);
 const tree = ref({ people: [], relationships: [] });
 const results = ref([]);
 const search = ref("");
@@ -384,7 +374,7 @@ const dragIndex = ref(null);
 const addPersonSectionRef = ref(null);
 const memberSearch = ref("");
 const memberPage = ref(1);
-const MEMBER_PAGE_LIMIT = 8;
+const MEMBER_PAGE_LIMIT = 10;
 let timer;
 
 const QUICK_OPTIONS = [
@@ -498,6 +488,7 @@ const onConnectAsChange = (personId) => {
 const load = async () => {
   members.value = await api.getLineageMembers(props.lineage._id);
   tree.value = await api.getLineageTree(props.lineage.slug);
+  loaded.value = true;
   // Default "Related to" to the root (or the first member) so the common
   // case is just: type a name, click Add.
   const stillThere = members.value.some((m) => m.personId?._id === quick.anchor);
@@ -678,6 +669,7 @@ onMounted(async () => {
     if (newPerson.value) ensureCandidateDefaults(newPerson.value.id);
   } catch (requestError) {
     error.value = requestError.message;
+    loaded.value = true;
   }
 });
 </script>
