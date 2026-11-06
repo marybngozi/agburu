@@ -16,7 +16,7 @@
         </div>
 
         <div class="mb-6 flex-1 rounded-lg border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
-          <span class="mb-2 inline-block rounded bg-blue-50 px-2 py-0.8 text-xs font-bold text-blue-800 dark:bg-clay-900 dark:text-clay-300">{{ formatDate(milestone.date) }}</span>
+          <span class="mb-2 inline-block rounded bg-blue-50 px-2 py-1 text-xs font-bold text-blue-800 dark:bg-clay-900 dark:text-clay-300">{{ formatDate(milestone.date) }}</span>
           <p class="m-0 text-sm leading-relaxed text-slate-700 dark:text-slate-100">{{ milestone.description }}</p>
         </div>
       </div>

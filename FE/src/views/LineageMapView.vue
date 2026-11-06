@@ -1,7 +1,7 @@
 <template>
   <main class="h-screen overflow-hidden bg-sand-50 font-sans dark:bg-slate-950">
     <header
-      class="absolute z-10 top-2 left-2 right-2 md:top-4 md:left-4 md:right-4 min-h-11.5 flex items-center justify-between gap-2 px-4 py-2.6 bg-sand-50/95 border border-stone-200 rounded-[10px] shadow-[0_4px_18px_rgba(23,53,45,0.04)] dark:bg-slate-900 dark:border-slate-800 dark:shadow-[0_4px_18px_rgba(0,0,0,0.4)]"
+      class="absolute z-10 top-2 left-2 right-2 md:top-4 md:left-4 md:right-4 min-h-11.5 flex items-center justify-between gap-2 px-4 py-2.5 bg-sand-50/95 border border-stone-200 rounded-[10px] shadow-[0_4px_18px_rgba(23,53,45,0.04)] dark:bg-slate-900 dark:border-slate-800 dark:shadow-[0_4px_18px_rgba(0,0,0,0.4)]"
     >
       <RouterLink
         to="/"
@@ -16,7 +16,7 @@
           >/{{ lineage.slug }}</small
         >
       </div>
-      <div class="flex items-center gap-2.4">
+      <div class="flex items-center gap-2.5">
         <ThemeToggle />
         <RouterLink
           to="/create-lineage"
@@ -28,7 +28,7 @@
 
     <aside
       v-if="lineage"
-      class="absolute z-5 top-20 left-2 md:top-23.2 md:left-4 w-[min(380px,calc(100vw-2rem))] max-w-62.5 md:max-w-none px-4 py-3.6 bg-sand-50/95 border border-stone-200 rounded-xl shadow-[0_8px_26px_rgba(23,53,45,0.05)] dark:bg-slate-900 dark:border-slate-800 dark:shadow-[0_8px_26px_rgba(0,0,0,0.5)]"
+      class="absolute z-5 top-20 left-2 md:top-23.2 md:left-4 w-[min(380px,calc(100vw-2rem))] max-w-62.5 md:max-w-none px-4 py-3.5 bg-sand-50/95 border border-stone-200 rounded-xl shadow-[0_8px_26px_rgba(23,53,45,0.05)] dark:bg-slate-900 dark:border-slate-800 dark:shadow-[0_8px_26px_rgba(0,0,0,0.5)]"
     >
       <button
         type="button"
@@ -70,12 +70,12 @@
         </template>
         <template v-else>
           <p
-            class="mt-1.4 mb-0 text-forest-800 text-[0.85rem] leading-[1.45] font-serif dark:text-slate-100"
+            class="mt-1.5 mb-0 text-forest-800 text-[0.85rem] leading-[1.45] font-serif dark:text-slate-100"
             :class="{ 'line-clamp-3': isStoryLong && !storyExpanded }"
           >
             {{ storyText }}
           </p>
-          <div class="mt-1.8 flex items-center gap-3">
+          <div class="mt-2 flex items-center gap-3">
             <button
               v-if="isStoryLong"
               type="button"
@@ -99,7 +99,7 @@
 
     <aside
       v-if="unconnectedPeople.length"
-      class="absolute z-5 top-auto left-2 bottom-16 md:top-23.2 md:left-auto md:right-4 md:bottom-auto w-[min(270px,calc(100vw-1rem))] md:w-67.5 p-3.6 bg-sand-50/95 border border-stone-200 rounded-xl shadow-[0_8px_26px_rgba(23,53,45,0.05)] dark:bg-slate-900 dark:border-slate-800 dark:shadow-[0_8px_26px_rgba(0,0,0,0.5)]"
+      class="absolute z-5 top-auto left-2 bottom-16 md:top-23.2 md:left-auto md:right-4 md:bottom-auto w-[min(270px,calc(100vw-1rem))] md:w-67.5 p-3.5 bg-sand-50/95 border border-stone-200 rounded-xl shadow-[0_8px_26px_rgba(23,53,45,0.05)] dark:bg-slate-900 dark:border-slate-800 dark:shadow-[0_8px_26px_rgba(0,0,0,0.5)]"
     >
       <button
         type="button"
@@ -113,7 +113,7 @@
             >Needs connection</span
           >
           <h2
-            class="mt-0.72 mb-0 text-forest-900 text-[0.95rem] dark:text-slate-100"
+            class="mt-0.5 mb-0 text-forest-900 text-[0.95rem] dark:text-slate-100"
           >
             Not yet connected
           </h2>
@@ -125,19 +125,19 @@
       </button>
       <template v-if="unconnectedExpanded">
       <p
-        class="mt-2.2 mb-2.8 text-[0.72rem] leading-[1.4] text-stone-500 dark:text-slate-400"
+        class="mt-2 mb-3 text-[0.72rem] leading-[1.4] text-stone-500 dark:text-slate-400"
       >
         These members have not yet been linked to anyone in the family tree.
       </p>
-      <div class="grid gap-1.6 max-h-54 overflow-y-auto">
+      <div class="grid gap-1.5 max-h-54 overflow-y-auto">
         <div
           v-for="person in unconnectedPeople"
           :key="person.id"
-          class="w-full flex items-center gap-1.6"
+          class="w-full flex items-center gap-1.5"
         >
           <button
             type="button"
-            class="flex-1 min-w-0 p-1.6 flex items-center gap-2 text-forest-900 bg-white border border-stone-200 rounded-lg text-[0.76rem] font-semibold text-left cursor-pointer hover:border-stone-300 hover:bg-stone-50 dark:text-slate-100 dark:bg-slate-900 dark:border-slate-800 dark:hover:border-slate-700 dark:hover:bg-slate-800"
+            class="flex-1 min-w-0 p-1.5 flex items-center gap-2 text-forest-900 bg-white border border-stone-200 rounded-lg text-[0.76rem] font-semibold text-left cursor-pointer hover:border-stone-300 hover:bg-stone-50 dark:text-slate-100 dark:bg-slate-900 dark:border-slate-800 dark:hover:border-slate-700 dark:hover:bg-slate-800"
             @click="openProfile(person)"
           >
             <img
@@ -158,7 +158,7 @@
           <button
             v-if="lineage.canManage"
             type="button"
-            class="shrink-0 px-2.2 py-1.6 border border-clay-600 rounded-lg bg-sand-50 text-clay-600 text-[0.68rem] font-bold cursor-pointer hover:bg-clay-600 hover:text-white dark:bg-slate-800 dark:border-clay-400 dark:text-clay-400 dark:hover:bg-clay-400 dark:hover:text-white"
+            class="shrink-0 px-2 py-1.5 border border-clay-600 rounded-lg bg-sand-50 text-clay-600 text-[0.68rem] font-bold cursor-pointer hover:bg-clay-600 hover:text-white dark:bg-slate-800 dark:border-clay-400 dark:text-clay-400 dark:hover:bg-clay-400 dark:hover:text-white"
             title="Connect this person to the family tree"
             @click="connectPerson(person)"
           >
@@ -213,7 +213,7 @@
     </div>
     <div
       v-if="showGestureHint"
-      class="absolute z-10 left-1/2 bottom-4 -translate-x-1/2 flex items-center gap-2 max-w-[calc(100vw-1.5rem)] pl-3.4 pr-2 py-2.2 bg-forest-900/92 text-sand-100 rounded-full shadow-[0_8px_20px_rgba(0,0,0,0.25)]"
+      class="absolute z-10 left-1/2 bottom-4 -translate-x-1/2 flex items-center gap-2 max-w-[calc(100vw-1.5rem)] pl-3.5 pr-2 py-2 bg-forest-900/92 text-sand-100 rounded-full shadow-[0_8px_20px_rgba(0,0,0,0.25)]"
     >
       <p class="m-0 text-[0.72rem] font-semibold truncate">
         🤏 Pinch to zoom · ✋ Drag to explore · Tap a card for details
@@ -243,7 +243,7 @@
           <li v-for="person in searchResults" :key="person.id">
             <button
               type="button"
-              class="w-full cursor-pointer truncate rounded border-0 bg-transparent px-2.5 py-1.8 text-left text-[0.8rem] text-forest-900 hover:bg-stone-100 dark:text-slate-100 dark:hover:bg-slate-800"
+              class="w-full cursor-pointer truncate rounded border-0 bg-transparent px-2.5 py-2 text-left text-[0.8rem] text-forest-900 hover:bg-stone-100 dark:text-slate-100 dark:hover:bg-slate-800"
               @click="goToPerson(person)"
             >
               {{ person.name }}
@@ -262,7 +262,7 @@
     </div>
     <div
       v-if="lineage"
-      class="absolute z-10 right-4 bottom-4 flex flex-col-reverse items-end gap-1.6 rounded-xl"
+      class="absolute z-10 right-4 bottom-4 flex flex-col-reverse items-end gap-1.5 rounded-xl"
       :class="
         edgeControlExpanded
           ? 'bg-sand-50/95 border border-stone-200 shadow-[0_8px_20px_rgba(0,0,0,0.1)] dark:bg-slate-900 dark:border-slate-800'
@@ -271,11 +271,11 @@
     >
       <button
         type="button"
-        class="flex items-center gap-1.6 rounded-[10px] bg-sand-50/95 border border-stone-200 shadow-[0_8px_20px_rgba(0,0,0,0.1)] font-sans font-semibold text-forest-900 cursor-pointer hover:border-stone-300 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100 dark:hover:border-clay-400"
+        class="flex items-center gap-1.5 rounded-[10px] bg-sand-50/95 border border-stone-200 shadow-[0_8px_20px_rgba(0,0,0,0.1)] font-sans font-semibold text-forest-900 cursor-pointer hover:border-stone-300 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100 dark:hover:border-clay-400"
         :class="
           edgeControlExpanded
-            ? 'px-2.8 py-2.4 text-[0.78rem]'
-            : 'p-2.2 text-base'
+            ? 'px-3 py-2.5 text-[0.78rem]'
+            : 'p-2 text-base'
         "
         :aria-expanded="edgeControlExpanded"
         :aria-label="
@@ -288,10 +288,10 @@
         <span aria-hidden="true">🌿</span>
         <span v-if="edgeControlExpanded">Connector style</span>
       </button>
-      <label v-if="edgeControlExpanded" class="flex items-center px-2.8 pb-2.8">
+      <label v-if="edgeControlExpanded" class="flex items-center px-3 pb-3">
         <select
           v-model="edgeStyle"
-          class="px-2 py-1.6 border border-stone-300 rounded-lg bg-white text-forest-900 font-sans font-semibold text-[0.78rem] dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
+          class="px-2 py-1.5 border border-stone-300 rounded-lg bg-white text-forest-900 font-sans font-semibold text-[0.78rem] dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
         >
           <option
             v-for="option in EDGE_STYLE_OPTIONS"

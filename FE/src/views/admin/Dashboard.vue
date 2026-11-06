@@ -124,12 +124,12 @@
               <div class="flex gap-1">
                 <span
                   v-if="member.title"
-                  class="inline-flex items-center rounded bg-sky-100 px-1.6 py-0.6 text-xs font-medium text-sky-700"
+                  class="inline-flex items-center rounded bg-sky-100 px-1.5 py-0.5 text-xs font-medium text-sky-700"
                   >{{ member.title }}</span
                 >
                 <span
                   v-if="member.titledName"
-                  class="inline-flex items-center rounded bg-amber-100 px-1.6 py-0.6 text-xs font-medium text-amber-700"
+                  class="inline-flex items-center rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-700"
                   >{{ member.titledName }}</span
                 >
                 <span v-if="!member.title && !member.titledName">—</span>
@@ -151,7 +151,7 @@
             <td class="border-b border-gray-100 px-4 py-3.5 text-gray-600 dark:border-slate-800 dark:text-slate-400"><div class="flex justify-end gap-2">
               <button
                 @click="editMember(member.id)"
-                class="rounded bg-blue-50 px-3 py-1.4 text-[0.825rem] font-medium text-blue-700"
+                class="rounded bg-blue-50 px-3 py-1.5 text-[0.825rem] font-medium text-blue-700"
               >
                 Edit
               </button>
@@ -159,14 +159,14 @@
               <button
                 v-if="!member.isDeleted"
                 @click="toggleDeleteStatus(member.id, true)"
-                class="rounded bg-red-100 px-3 py-1.4 text-[0.825rem] font-medium text-red-700"
+                class="rounded bg-red-100 px-3 py-1.5 text-[0.825rem] font-medium text-red-700"
               >
                 Delete
               </button>
               <button
                 v-else
                 @click="toggleDeleteStatus(member.id, false)"
-                class="rounded bg-emerald-50 px-3 py-1.4 text-[0.825rem] font-medium text-emerald-700"
+                class="rounded bg-emerald-50 px-3 py-1.5 text-[0.825rem] font-medium text-emerald-700"
               >
                 Restore
               </button>

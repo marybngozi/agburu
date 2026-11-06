@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col gap-1.6">
+  <div class="flex flex-col gap-1.5">
     <div v-if="isLoading" class="py-2 text-center text-[0.7rem] text-gray-400">
       Loading list...
     </div>
@@ -14,7 +14,7 @@
       v-else
       v-for="partner in partners"
       :key="partner.id"
-      class="flex items-center justify-between gap-2 rounded-md border border-pink-200 bg-white p-2.2 dark:border-pink-900 dark:bg-slate-900 p-1.5"
+      class="flex items-center justify-between gap-2 rounded-md border border-pink-200 bg-white p-2 dark:border-pink-900 dark:bg-slate-900 p-1.5"
     >
       <div class="flex min-w-0 items-center gap-2">
         <img
@@ -39,7 +39,7 @@
       </div>
       <button
         type="button"
-        class="cursor-pointer rounded border-0 bg-pink-50 px-1.6 py-1.12 text-[0.7rem] font-semibold text-pink-800 hover:bg-pink-100"
+        class="cursor-pointer rounded border-0 bg-pink-50 px-1.5 py-1 text-[0.7rem] font-semibold text-pink-800 hover:bg-pink-100"
         @click="$emit('show-info', partner)"
       >
         ℹ️ Info

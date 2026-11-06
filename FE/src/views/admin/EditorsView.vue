@@ -12,7 +12,7 @@
     </div>
     <section class="my-4 rounded-[10px] border border-slate-200 p-4 dark:border-slate-800 dark:bg-slate-900">
       <h2>Create editor account</h2>
-      <div class="grid grid-cols-1 gap-2.4 sm:grid-cols-2">
+      <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
         <input v-model="form.username" placeholder="Username" class="field-input" />
         <input v-model="form.email" type="email" placeholder="Email" class="field-input" />
         <input

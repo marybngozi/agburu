@@ -3,9 +3,9 @@
     <div class="animate-[modal-pop_0.25s_cubic-bezier(0.16,1,0.3,1)] flex w-full max-w-130 flex-col overflow-hidden rounded-xl bg-white shadow-[0_20px_25px_-5px_rgba(0,0,0,0.15),0_10px_10px_-5px_rgba(0,0,0,0.04)] dark:bg-slate-900">
       <div class="flex items-start justify-between border-b border-slate-100 px-6 py-5 dark:border-slate-800">
         <div>
-          <span v-if="activePerson.title || activePerson.titledName" class="flex gap-1.4">
-            <span v-if="activePerson.title" class="rounded bg-sky-100 px-1.6 py-0.6 text-[0.7rem] font-semibold text-sky-700">{{ activePerson.title }}</span>
-            <span v-if="activePerson.titledName" class="rounded bg-amber-100 px-1.6 py-0.6 text-[0.7rem] font-semibold text-amber-700">{{ activePerson.titledName }}</span>
+          <span v-if="activePerson.title || activePerson.titledName" class="flex gap-1.5">
+            <span v-if="activePerson.title" class="rounded bg-sky-100 px-1.5 py-0.5 text-[0.7rem] font-semibold text-sky-700">{{ activePerson.title }}</span>
+            <span v-if="activePerson.titledName" class="rounded bg-amber-100 px-1.5 py-0.5 text-[0.7rem] font-semibold text-amber-700">{{ activePerson.titledName }}</span>
           </span>
           <h3 class="mt-1 text-[1.35rem] font-bold text-slate-900 dark:text-slate-100">{{ activePerson.name }}</h3>
         </div>

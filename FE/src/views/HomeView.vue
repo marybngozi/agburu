@@ -85,17 +85,17 @@
           class="hidden h-67.5 w-67.5 rounded-full border border-[#9aac9d] sm:absolute sm:top-1/2 sm:left-1/2 sm:block sm:-translate-x-1/2 sm:-translate-y-1/2 dark:border-slate-700"
         ></div>
         <div
-          class="static w-full rounded-lg bg-[#fdfcf7] px-4 py-3.4 text-center text-base font-serif italic shadow-[0_10px_30px_rgba(23,53,45,0.125)] sm:absolute sm:top-13.75 sm:left-15.5 sm:w-auto sm:px-4.8 sm:py-4 sm:text-left sm:text-[1.1rem] dark:bg-slate-900 dark:text-slate-100 dark:shadow-[0_10px_30px_rgba(0,0,0,0.4)]"
+          class="static w-full rounded-lg bg-[#fdfcf7] px-4 py-3.5 text-center text-base font-serif italic shadow-[0_10px_30px_rgba(23,53,45,0.125)] sm:absolute sm:top-13.75 sm:left-15.5 sm:w-auto sm:px-5 sm:py-4 sm:text-left sm:text-[1.1rem] dark:bg-slate-900 dark:text-slate-100 dark:shadow-[0_10px_30px_rgba(0,0,0,0.4)]"
         >
           Past
         </div>
         <div
-          class="static w-full rounded-lg bg-clay-600 px-4 py-3.4 text-center text-base font-serif text-white italic shadow-[0_10px_30px_rgba(23,53,45,0.125)] sm:absolute sm:top-37.5 sm:right-15 sm:w-auto sm:px-4.8 sm:py-4 sm:text-left sm:text-[1.1rem] dark:bg-clay-600 dark:text-slate-950 dark:shadow-[0_10px_30px_rgba(0,0,0,0.4)]"
+          class="static w-full rounded-lg bg-clay-600 px-4 py-3.5 text-center text-base font-serif text-white italic shadow-[0_10px_30px_rgba(23,53,45,0.125)] sm:absolute sm:top-37.5 sm:right-15 sm:w-auto sm:px-5 sm:py-4 sm:text-left sm:text-[1.1rem] dark:bg-clay-600 dark:text-slate-950 dark:shadow-[0_10px_30px_rgba(0,0,0,0.4)]"
         >
           Present
         </div>
         <div
-          class="static w-full rounded-lg bg-[#fdfcf7] px-4 py-3.4 text-center text-base font-serif italic shadow-[0_10px_30px_rgba(23,53,45,0.125)] sm:absolute sm:bottom-12 sm:left-33.75 sm:w-auto sm:px-4.8 sm:py-4 sm:text-left sm:text-[1.1rem] dark:bg-slate-900 dark:text-slate-100 dark:shadow-[0_10px_30px_rgba(0,0,0,0.4)]"
+          class="static w-full rounded-lg bg-[#fdfcf7] px-4 py-3.5 text-center text-base font-serif italic shadow-[0_10px_30px_rgba(23,53,45,0.125)] sm:absolute sm:bottom-12 sm:left-33.75 sm:w-auto sm:px-5 sm:py-4 sm:text-left sm:text-[1.1rem] dark:bg-slate-900 dark:text-slate-100 dark:shadow-[0_10px_30px_rgba(0,0,0,0.4)]"
         >
           Future
         </div>

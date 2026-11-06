@@ -31,7 +31,7 @@
           v-for="lineage in lineages"
           :key="lineage._id"
           :class="[
-            'w-full grid gap-1 text-left my-2 rounded-md border p-2.8 cursor-pointer dark:text-slate-100',
+            'w-full grid gap-1 text-left my-2 rounded-md border p-3 cursor-pointer dark:text-slate-100',
             selected?._id === lineage._id
               ? 'border-blue-600 bg-blue-50 dark:border-blue-500 dark:bg-blue-500/10'
               : 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900',
@@ -57,7 +57,7 @@
             :to="`/${selected.slug}`"
             target="_blank"
             rel="noopener"
-            class="rounded-[5px] border border-slate-300 bg-white px-2.8 py-1.8 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+            class="rounded-[5px] border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
           >
             View public page →
           </RouterLink>

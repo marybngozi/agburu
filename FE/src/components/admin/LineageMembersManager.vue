@@ -74,16 +74,16 @@
         lineage but still "Not yet connected" — or create a new one with the full form and come
         back here.
       </p>
-    <div class="flex flex-wrap items-center gap-2.4">
+    <div class="flex flex-wrap items-center gap-2.5">
       <input
         v-model="search"
         @input="searchPeople"
         placeholder="Search people by name"
-        class="rounded-[5px] border border-slate-300 bg-white px-2.8 py-1.8 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+        class="rounded-[5px] border border-slate-300 bg-white px-3 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
       />
       <RouterLink
         :to="{ name: 'add-member', query: { returnTo: props.returnTo } }"
-        class="rounded-[5px] border border-slate-300 bg-white px-2.8 py-1.8 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+        class="rounded-[5px] border border-slate-300 bg-white px-3 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
       >
         + New person
       </RouterLink>
@@ -93,9 +93,9 @@
     <div
       v-for="person in addCandidates"
       :key="person.id"
-      class="rounded-lg border border-slate-200 bg-slate-50 p-3 my-2.4 dark:border-slate-800 dark:bg-slate-800/50"
+      class="rounded-lg border border-slate-200 bg-slate-50 p-3 my-2.5 dark:border-slate-800 dark:bg-slate-800/50"
     >
-      <div class="flex items-center gap-2 mb-2.2 flex-wrap">
+      <div class="flex items-center gap-2 mb-2 flex-wrap">
         <RouterLink
           :to="{ name: 'profile', params: { id: person.id } }"
           target="_blank"
@@ -115,12 +115,12 @@
           >Already a member — connect below</span
         >
       </div>
-      <div class="flex flex-col items-stretch gap-2.4 flex-wrap sm:flex-row sm:items-end">
+      <div class="flex flex-col items-stretch gap-2.5 flex-wrap sm:flex-row sm:items-end">
         <label class="grid gap-1 text-[0.72rem] font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400 w-full sm:w-auto sm:min-w-35">
           Membership
           <select
             v-model="joining[person.id]"
-            class="w-full rounded-[5px] border border-slate-300 bg-white px-2.8 py-1.8 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+            class="w-full rounded-[5px] border border-slate-300 bg-white px-3 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
           >
             <option value="birthed">Birthed</option>
             <option value="married">Married</option>
@@ -132,7 +132,7 @@
           <select
             v-model="connectAs[person.id]"
             @change="onConnectAsChange(person.id)"
-            class="w-full rounded-[5px] border border-slate-300 bg-white px-2.8 py-1.8 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+            class="w-full rounded-[5px] border border-slate-300 bg-white px-3 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
           >
             <option value="none">Not connected yet</option>
             <option value="child">Child of…</option>
@@ -155,7 +155,7 @@
             (person.__pinned && connectAs[person.id] === 'none') ||
             isSubmitting[person.id]
           "
-          class="inline-flex items-center justify-center whitespace-nowrap self-stretch sm:self-end rounded-[5px] border border-slate-300 bg-white px-2.8 py-1.8 text-sm disabled:opacity-65 disabled:cursor-not-allowed dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+          class="inline-flex items-center justify-center whitespace-nowrap self-stretch sm:self-end rounded-[5px] border border-slate-300 bg-white px-3 py-1.5 text-sm disabled:opacity-65 disabled:cursor-not-allowed dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
         >
           <span
             v-if="isSubmitting[person.id]"
@@ -175,14 +175,14 @@
 
     <hr class="border-0 border-t border-slate-200 my-6 dark:border-slate-800" />
     <h3 class="font-semibold">Reorder children</h3>
-    <p class="text-slate-500 text-[0.85rem] mt-0.8 mb-3 dark:text-slate-400">
+    <p class="text-slate-500 text-[0.85rem] mt-1 mb-3 dark:text-slate-400">
       Pick a parent, then drag their children — or use the arrows — into
       the order they should appear on the family map. Changes stay on this
       page until you click "Save order".
     </p>
     <select
       v-model="reorderParentId"
-      class="rounded-[5px] border border-slate-300 bg-white px-2.8 py-1.8 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+      class="rounded-[5px] border border-slate-300 bg-white px-3 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
     >
       <option value="">Select a parent</option>
       <option
@@ -198,7 +198,7 @@
         v-for="(child, index) in localChildOrder"
         :key="child.id"
         :class="[
-          'flex items-center gap-2.4 p-2.6 my-1.4 rounded-[5px] border cursor-grab',
+          'flex items-center gap-2.5 p-2.5 my-1.5 rounded-[5px] border cursor-grab',
           dragIndex === index
             ? 'opacity-50 border-dashed border-slate-300 dark:border-slate-600'
             : 'border-slate-300 bg-slate-50 dark:border-slate-600 dark:bg-slate-800',
@@ -211,13 +211,13 @@
       >
         <span class="text-slate-400 dark:text-slate-500" aria-hidden="true">☰</span>
         <span class="flex-1">{{ child.name }}</span>
-        <div class="flex gap-1.2">
+        <div class="flex gap-1">
           <button
             type="button"
             :disabled="index === 0"
             title="Move up"
             @click="moveChild(index, index - 1)"
-            class="rounded-[5px] border border-slate-300 bg-white leading-none px-2 py-0.8 disabled:opacity-35 disabled:cursor-not-allowed dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+            class="rounded-[5px] border border-slate-300 bg-white leading-none px-2 py-1 disabled:opacity-35 disabled:cursor-not-allowed dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
           >
             ↑
           </button>
@@ -226,7 +226,7 @@
             :disabled="index === localChildOrder.length - 1"
             title="Move down"
             @click="moveChild(index, index + 1)"
-            class="rounded-[5px] border border-slate-300 bg-white leading-none px-2 py-0.8 disabled:opacity-35 disabled:cursor-not-allowed dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+            class="rounded-[5px] border border-slate-300 bg-white leading-none px-2 py-1 disabled:opacity-35 disabled:cursor-not-allowed dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
           >
             ↓
           </button>
@@ -243,7 +243,7 @@
           type="button"
           :disabled="!isReorderDirty || isSavingOrder"
           @click="saveChildOrder"
-          class="rounded-[5px] border border-slate-300 bg-slate-900 px-2.8 py-1.8 text-sm text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed dark:border-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600"
+          class="rounded-[5px] border border-slate-300 bg-slate-900 px-3 py-1.5 text-sm text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed dark:border-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600"
         >
           {{ isSavingOrder ? "Saving…" : "Save order" }}
         </button>
@@ -271,9 +271,9 @@
         <table class="w-full min-w-120 border-collapse text-left text-[0.9rem]">
           <thead>
             <tr>
-              <th class="bg-slate-50 text-slate-600 px-3.4 py-2.6 font-semibold text-xs border-b border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700">Name</th>
-              <th class="bg-slate-50 text-slate-600 px-3.4 py-2.6 font-semibold text-xs border-b border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700">Role</th>
-              <th class="bg-slate-50 text-slate-600 px-3.4 py-2.6 font-semibold text-xs border-b border-slate-200 text-right dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700">Actions</th>
+              <th class="bg-slate-50 text-slate-600 px-4 py-3 font-semibold text-xs border-b border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700">Name</th>
+              <th class="bg-slate-50 text-slate-600 px-4 py-3 font-semibold text-xs border-b border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700">Role</th>
+              <th class="bg-slate-50 text-slate-600 px-4 py-3 font-semibold text-xs border-b border-slate-200 text-right dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -287,7 +287,7 @@
               :key="member._id"
               class="[&:last-child>td]:border-b-0"
             >
-              <td class="px-3.4 py-2.6 border-b border-slate-100 dark:border-slate-800 dark:text-slate-100">
+              <td class="px-4 py-3 border-b border-slate-100 dark:border-slate-800 dark:text-slate-100">
                 <RouterLink
                   v-if="member.personId?._id"
                   :to="{ name: 'profile', params: { id: member.personId._id } }"
@@ -299,21 +299,21 @@
                 </RouterLink>
                 <template v-else>{{ member.personId?.name }}</template>
               </td>
-              <td class="px-3.4 py-2.6 border-b border-slate-100 dark:border-slate-800 dark:text-slate-100">
+              <td class="px-4 py-3 border-b border-slate-100 dark:border-slate-800 dark:text-slate-100">
                 <em v-if="member.isRoot" class="badge not-italic bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">Root</em>
               </td>
-              <td class="px-3.4 py-2.6 border-b border-slate-100 text-right dark:border-slate-800 dark:text-slate-100">
+              <td class="px-4 py-3 border-b border-slate-100 text-right dark:border-slate-800 dark:text-slate-100">
                 <RouterLink
                   v-if="member.personId?._id"
                   :to="{ name: 'edit-member', params: { id: member.personId._id }, query: { returnTo: props.returnTo } }"
-                  class="mr-2 rounded-[5px] border border-slate-300 bg-white px-2.8 py-1.8 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                  class="mr-2 rounded-[5px] border border-slate-300 bg-white px-3 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
                 >
                   Edit
                 </RouterLink>
                 <button
                   v-if="!member.isRoot"
                   @click="setRoot(member._id)"
-                  class="rounded-[5px] border border-slate-300 bg-white px-2.8 py-1.8 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                  class="rounded-[5px] border border-slate-300 bg-white px-3 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
                 >
                   Make root
                 </button>

@@ -13,16 +13,16 @@
         class="h-12.5 w-12.5 rounded-full border-2 border-gray-100 bg-gray-100 object-cover dark:border-slate-800 dark:bg-slate-800"
       />
 
-      <div class="flex flex-1 flex-col gap-0.6 overflow-hidden">
+      <div class="flex flex-1 flex-col gap-0.5 overflow-hidden">
         <div class="flex flex-wrap gap-1">
           <span
             v-if="data.title"
-            class="rounded-[3px] bg-sky-100 px-1.2 py-0.4 text-[0.65rem] font-semibold text-sky-700"
+            class="rounded-[3px] bg-sky-100 px-1 py-0.5 text-[0.65rem] font-semibold text-sky-700"
             >{{ data.title }}</span
           >
           <span
             v-if="data.titledName"
-            class="rounded-[3px] bg-amber-100 px-1.2 py-0.4 text-[0.65rem] font-semibold text-amber-700"
+            class="rounded-[3px] bg-amber-100 px-1 py-0.5 text-[0.65rem] font-semibold text-amber-700"
             >{{ data.titledName }}</span
           >
         </div>
@@ -36,12 +36,12 @@
 
     <!-- Interactive Action Footer Inside Node Box -->
     <div
-      class="flex justify-between gap-1.4 border-t border-gray-100 pt-2 dark:border-slate-700"
+      class="flex justify-between gap-1.5 border-t border-gray-100 pt-2 dark:border-slate-700"
     >
       <!-- Info Button: Opens Quick Bio Popup Summary Modal -->
       <button
         type="button"
-        class="cursor-pointer rounded px-1.6 py-1 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 dark:text-slate-400 dark:bg-slate-800 dark:hover:bg-slate-700"
+        class="cursor-pointer rounded px-1.5 py-1 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 dark:text-slate-400 dark:bg-slate-800 dark:hover:bg-slate-700"
         @click="$emit('show-info', data)"
         title="View Summary Biography"
       >
@@ -51,7 +51,7 @@
       <div v-if="data.canManage" class="relative">
         <button
           type="button"
-          class="cursor-pointer rounded bg-emerald-50 px-1.6 py-1 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-300"
+          class="cursor-pointer rounded bg-emerald-50 px-1.5 py-1 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-300"
           title="Add a relative"
           @click.stop="showAddMenu = !showAddMenu"
         >
@@ -90,7 +90,7 @@
       class="before:content-[''] before:absolute before:top-12 before:right-full before:w-8.75 before:border-t-[3px] before:border-t-pink-600 absolute top-2.5 left-[calc(100%+35px)] z-50 w-55 rounded-[9px] border-2 border-pink-600 bg-[#fffdfb] p-2 shadow-[0_12px_24px_rgba(131,24,67,0.15)] dark:bg-slate-900"
     >
       <div
-        class="flex items-center justify-between border-b border-pink-100 pb-1.8 text-xs font-bold text-pink-800 dark:border-slate-700"
+        class="flex items-center justify-between border-b border-pink-100 pb-2 text-xs font-bold text-pink-800 dark:border-slate-700"
       >
         <span>Spouse{{ data.partnerIds.length > 1 ? "s" : "" }}</span
         ><button
