@@ -118,7 +118,7 @@
           <div
             v-if="person.detailedBiography"
             class="rich-text-content prose prose-sm max-w-none dark:prose-invert"
-            v-html="person.detailedBiography"
+            v-html="safeBiography"
           ></div>
           <p
             v-else
@@ -222,7 +222,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, markRaw } from "vue";
+import { ref, computed, onMounted, watch, markRaw } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { VueFlow } from "@vue-flow/core";
 import { api } from "@/api";
@@ -234,6 +234,7 @@ import SeeMoreNode from "@/components/canvas/SeeMoreNode.vue";
 import BranchEdge from "@/components/canvas/BranchEdge.vue";
 import ThemeToggle from "@/components/ui/ThemeToggle.vue";
 import { setPageTitle, withSiteSuffix } from "@/composables/useDocumentMeta";
+import { sanitizeBiography } from "@/utils/sanitizeHtml";
 
 const route = useRoute();
 const router = useRouter();
@@ -256,6 +257,10 @@ const {
   collapseChildBranch,
   revealHiddenChildren,
 } = useLineage();
+
+// Rendered with v-html, so sanitized again here even though the server
+// already cleans biographies on save (older records may predate that).
+const safeBiography = computed(() => sanitizeBiography(person.value?.detailedBiography));
 
 onMounted(async () => {
   await loadWorkspaceProfile(route.params.id);
@@ -281,7 +286,8 @@ const loadWorkspaceProfile = async (id) => {
         withSiteSuffix(data.name),
         data.biographySummary || undefined,
       );
-      await loadInitialTree(id);
+      // `id` may be a profile slug; the tree needs the real record id.
+      await loadInitialTree(data.id);
     } else {
       router.push("/");
     }

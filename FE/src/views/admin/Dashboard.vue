@@ -1,4 +1,5 @@
 <template>
+  <AppShell>
   <div class="mx-auto my-8 max-w-275 px-4 font-sans">
     <!-- Top Action Bar -->
     <div
@@ -13,7 +14,6 @@
         </p>
       </div>
       <div class="flex w-full flex-wrap items-center gap-3 md:w-auto md:flex-nowrap">
-        <ThemeToggle />
         <button
           @click="$router.push({ name: 'admin-lineages' })"
           class="btn-secondary flex-1 md:flex-none"
@@ -31,9 +31,6 @@
           class="inline-flex flex-1 items-center justify-center gap-2 rounded-md bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 md:flex-none"
         >
           + Add New Person
-        </button>
-        <button @click="handleLogout" class="btn-secondary flex-1 md:flex-none">
-          Sign Out
         </button>
       </div>
     </div>
@@ -195,9 +192,11 @@
       </button>
     </div>
   </div>
+  </AppShell>
 </template>
 
 <script setup>
+import AppShell from '@/components/ui/AppShell.vue';
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { api } from "@/api";

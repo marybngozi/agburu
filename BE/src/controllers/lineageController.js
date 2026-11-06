@@ -5,32 +5,64 @@ import LineageMember from '../models/LineageMember.js';
 import Person from '../models/Person.js';
 import Relationship from '../models/Relationship.js';
 
-const toSlug = (value = '') => value.toLowerCase().trim()
-  .replace(/[^a-z0-9]+/g, '-')
-  .replace(/(^-|-$)/g, '');
+import { toSlug, validateSlug } from '../utils/slugs.js';
+
+// The tree only needs enough to draw each card and the quick-view modal.
+// Full biographies and milestones are fetched per person from the profile
+// page instead of riding along with every member of the lineage.
+const TREE_PERSON_FIELDS = [
+  '_id', 'name', 'title', 'titledName', 'gender', 'profilePicture', 'biographySummary',
+  'birthDate', 'deathDate', 'partnerIds'
+];
+const pickFields = (person, fields) => Object.fromEntries(fields.filter((field) => field in person).map((field) => [field, person[field]]));
 
 const canViewFullLineage = async (lineageId, user) => {
   if (!user) return false;
   if (user.role === 'platform_admin') return true;
+  if (user.role === 'lineage_owner') {
+    const owned = await Lineage.exists({ _id: lineageId, ownerId: user._id });
+    if (owned) return true;
+  }
   if (!user.assignedPersonId) return false;
   return Boolean(await LineageMember.exists({ lineageId, personId: user.assignedPersonId, isDeleted: false }));
 };
 
+// Requires a signed-in account (see the `protect` middleware on this route)
+// so every lineage has a real owner going forward — requesterName/Email
+// free-text fields are gone in favor of the account's own identity.
+// Lineages created before self-signup existed (or by the legacy migration
+// script) simply have ownerId: null; they're unaffected and stay
+// manageable by any platform_admin as before.
 export const requestLineage = async (req, res) => {
   try {
-    const { name, slug: requestedSlug, description = '', visibility = 'public', requesterName, requesterEmail } = req.body;
-    const slug = toSlug(requestedSlug || name);
-    if (!name || !slug || !requesterName || !requesterEmail) {
-      return res.status(400).json({ message: 'Name, slug, and requester contact details are required' });
+    const { name, slug: requestedSlug, description = '', visibility = 'public' } = req.body;
+    if (typeof name !== 'string' || !name.trim()) {
+      return res.status(400).json({ message: 'A lineage name is required' });
+    }
+    const slug = toSlug(typeof requestedSlug === 'string' && requestedSlug ? requestedSlug : name);
+    const slugProblem = validateSlug(slug);
+    if (slugProblem) return res.status(400).json({ message: slugProblem });
+    if (!['public', 'private'].includes(visibility)) {
+      return res.status(400).json({ message: 'Visibility must be public or private' });
     }
     const lineage = await Lineage.create({
-      name, slug, description, visibility,
-      requestedBy: { name: requesterName, email: requesterEmail }
+      name: name.trim().slice(0, 120), slug, description: typeof description === 'string' ? description.slice(0, 2000) : '', visibility,
+      requestedBy: { name: req.user.username || req.user.email, email: req.user.email },
+      ownerId: req.user._id
     });
     res.status(201).json({ id: lineage._id, slug: lineage.slug, status: lineage.status });
   } catch (error) {
     res.status(error.code === 11000 ? 409 : 500).json({ message: error.code === 11000 ? 'That lineage URL is already in use' : error.message });
   }
+};
+
+// A lineage_owner's own "My lineages" list — every lineage they've
+// requested, pending or approved. Deliberately narrower than
+// listAdminLineages (platform_admin-only, returns every lineage site-wide):
+// this only ever returns the caller's own.
+export const listMyLineages = async (req, res) => {
+  const lineages = await Lineage.find({ ownerId: req.user._id }).sort({ createdAt: -1 });
+  res.json(lineages);
 };
 
 export const listPublicLineages = async (req, res) => {
@@ -52,7 +84,7 @@ export const getLineageTree = async (req, res) => {
     const visiblePeople = members.flatMap((member) => {
       const person = peopleById.get(member.personId.toString());
       if (!person) return [];
-      const record = fullAccess ? person : { _id: person._id, name: person.name, profilePicture: person.profilePicture };
+      const record = pickFields(person, fullAccess ? TREE_PERSON_FIELDS : ['_id', 'name', 'profilePicture']);
       return [{ ...record, id: person._id.toString(), memberId: member._id.toString(), modeOfJoining: member.modeOfJoining, isRoot: member.isRoot }];
     });
     const relationships = await Relationship.find({ lineageId: lineage._id }).sort({ childOrder: 1 }).lean();
@@ -91,9 +123,13 @@ export const listLineageMembers = async (req, res) => {
 export const addLineageMember = async (req, res) => {
   try {
     const { personId, modeOfJoining = 'birthed' } = req.body;
+    if (!mongoose.isValidObjectId(personId)) return res.status(400).json({ message: 'A valid person is required' });
     const [lineage, person] = await Promise.all([Lineage.findById(req.params.lineageId), Person.findById(personId)]);
     if (!lineage) return res.status(404).json({ message: 'Lineage not found' });
     if (!person || person.isDeleted) return res.status(404).json({ message: 'Person not found' });
+    if (req.user.role !== 'platform_admin' && String(person.createdBy) !== String(req.user._id)) {
+      return res.status(403).json({ message: 'You can only add people you created yourself' });
+    }
     const member = await LineageMember.create({ lineageId: lineage._id, personId: person._id, modeOfJoining });
     await AuditLog.create({ actorId: req.user._id, action: 'lineage.member_added', entityType: 'LineageMember', entityId: member._id });
     res.status(201).json(member);
@@ -105,6 +141,9 @@ export const addLineageMember = async (req, res) => {
 export const createRelationship = async (req, res) => {
   try {
     const { type, parentPersonId, childPersonId, personIds = [] } = req.body;
+    if (![parentPersonId, childPersonId, ...(Array.isArray(personIds) ? personIds : [])].filter(Boolean).every((id) => mongoose.isValidObjectId(id))) {
+      return res.status(400).json({ message: 'Invalid person id' });
+    }
     if (!['parent_child', 'marriage'].includes(type)) return res.status(400).json({ message: 'A valid relationship type is required' });
     if (type === 'parent_child' && (!parentPersonId || !childPersonId || parentPersonId === childPersonId)) {
       return res.status(400).json({ message: 'A distinct parent and child are required' });

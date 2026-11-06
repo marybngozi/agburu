@@ -1,7 +1,8 @@
 <template>
   <router-view />
+  <AppFeedback />
 </template>
 
 <script setup>
-// Base layout wrapper
+import AppFeedback from "@/components/ui/AppFeedback.vue";
 </script>

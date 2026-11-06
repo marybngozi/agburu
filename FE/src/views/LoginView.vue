@@ -1,9 +1,9 @@
 <template>
-  <div class="relative flex min-h-screen items-center justify-center bg-gray-50 dark:bg-slate-950">
-    <div class="absolute top-5 right-5"><ThemeToggle /></div>
+  <AppShell>
+  <div class="flex items-center justify-center px-4 py-16">
     <div class="card w-full max-w-sm p-10">
-      <h2 class="mb-1 text-2xl font-bold text-gray-900 dark:text-slate-100">Agburu Admin Access</h2>
-      <p class="mb-8 text-sm text-gray-500 dark:text-slate-400">Sign in to manage lineage records</p>
+      <h2 class="mb-1 text-2xl font-bold text-gray-900 dark:text-slate-100">Sign in to Agburu</h2>
+      <p class="mb-8 text-sm text-gray-500 dark:text-slate-400">Manage your lineage, or sign in as an administrator</p>
 
       <form @submit.prevent="handleSubmit">
         <div class="mb-5">
@@ -13,7 +13,7 @@
             id="email"
             v-model="email"
             required
-            placeholder="admin@agburu.com"
+            placeholder="you@example.com" autocomplete="email"
             class="field-input"
           />
         </div>
@@ -23,6 +23,7 @@
           <input
             type="password"
             id="password"
+            autocomplete="current-password"
             v-model="password"
             required
             class="field-input"
@@ -37,14 +38,24 @@
           {{ isPending ? 'Signing In...' : 'Login' }}
         </button>
       </form>
+
+      <p class="mt-6 text-center text-sm text-gray-500 dark:text-slate-400">
+        New here?
+        <RouterLink
+          :to="{ name: 'signup', query: $route.query.redirect ? { redirect: $route.query.redirect } : {} }"
+          class="font-semibold text-blue-600 dark:text-blue-400"
+          >Create an account</RouterLink
+        >
+      </p>
     </div>
   </div>
+  </AppShell>
 </template>
 
 <script setup>
+import AppShell from '@/components/ui/AppShell.vue';
 import { ref } from 'vue';
 import { useAuth } from '@/composables/useAuth';
-import ThemeToggle from '@/components/ui/ThemeToggle.vue';
 
 const email = ref('');
 const password = ref('');

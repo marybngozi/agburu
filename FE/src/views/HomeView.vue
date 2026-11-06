@@ -26,11 +26,24 @@
           to="/create-lineage"
           >Create a lineage</RouterLink
         >
-        <!-- <RouterLink
-          class="rounded-full border border-[#b8c4b7] px-3.5 py-2.5 font-sans text-[0.86rem] font-semibold text-forest-900 no-underline dark:border-slate-700 dark:text-slate-100"
-          to="/login"
-          >Admin sign in</RouterLink
-        > -->
+        <RouterLink
+          v-if="isLoggedIn"
+          class="font-sans text-[0.86rem] font-semibold text-forest-900 no-underline dark:text-slate-100"
+          :to="homeAccountLink.to"
+          >{{ homeAccountLink.label }}</RouterLink
+        >
+        <template v-else>
+          <RouterLink
+            class="font-sans text-[0.86rem] font-semibold text-forest-900 no-underline dark:text-slate-100"
+            to="/login"
+            >Log in</RouterLink
+          >
+          <RouterLink
+            class="rounded-full border border-[#b8c4b7] px-3.5 py-2.5 font-sans text-[0.86rem] font-semibold text-forest-900 no-underline dark:border-slate-700 dark:text-slate-100"
+            to="/signup"
+            >Sign up</RouterLink
+          >
+        </template>
         <ThemeToggle />
       </div>
     </nav>
@@ -110,7 +123,7 @@
         >
           Agburu was inspired by the passing of
           <!-- do not remove the hardcoded link -->
-          <router-link to="profile/6a744d6185502bf16fb90dba">
+          <router-link to="/profile/basil-umeh">
             Late Prince Basil C. Umeh (Ezegoudo)
           </router-link>
           —a husband, father, brother, and grandfather. May the memories we
@@ -143,6 +156,12 @@
         class="py-8 font-sans text-[0.78rem] font-semibold text-clay-600"
       >
         Loading lineages…
+      </div>
+      <div
+        v-else-if="loadFailed"
+        class="py-8 font-sans text-[0.78rem] font-semibold text-clay-600"
+      >
+        We couldn't load the lineages right now. Please refresh in a moment.
       </div>
       <div
         v-else-if="lineages.length"
@@ -187,16 +206,37 @@
   </main>
 </template>
 <script setup>
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { api } from "@/api";
 import basilImage from "@/assets/late-prince-basil-umeh.jpeg";
 import logo from "@/assets/agburu-logo.svg";
 import ThemeToggle from "@/components/ui/ThemeToggle.vue";
+import { useAuth } from "@/composables/useAuth";
+
 const lineages = ref([]);
 const loading = ref(true);
+const loadFailed = ref(false);
+
+// Reads the same shared auth state useAuth() exposes everywhere else
+// (populated at login/signup — see useAuth.js) rather than re-deriving it
+// from localStorage directly, so this stays in sync if the user logs out
+// in another tab/view while this page is open.
+const { user } = useAuth();
+const isLoggedIn = computed(() => Boolean(user.value?.token));
+// platform_admin's natural home is still the admin dashboard; every other
+// signed-in role (lineage_owner today, profile_editor too) lands on their
+// own lineages.
+const homeAccountLink = computed(() =>
+  user.value?.role === "platform_admin"
+    ? { to: "/admin", label: "Admin dashboard" }
+    : { to: "/my-lineages", label: "My lineages" },
+);
+
 onMounted(async () => {
   try {
     lineages.value = await api.getLineages();
+  } catch {
+    loadFailed.value = true;
   } finally {
     loading.value = false;
   }

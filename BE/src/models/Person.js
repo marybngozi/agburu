@@ -18,6 +18,17 @@ const personSchema = new mongoose.Schema({
   biographySummary: { type: String, default: '' },
   detailedBiography: { type: String, default: '' },
   
+  // Optional human-readable address (e.g. /profile/basil-umeh). Only a
+  // platform_admin can set it; getPersonById accepts either this or the id.
+  slug: { type: String, trim: true, lowercase: true, unique: true, sparse: true },
+  // The account that created this record. Non-admin accounts may only edit
+  // or add to a lineage the people they created — see requirePersonOwnerOrAdmin.
+  // null on records that predate self-signup (admin-only to edit).
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin', default: null, index: true },
+
+  // Legacy relationship fields. Nothing writes them any more — the
+  // Relationship collection is the source of truth, and these are derived
+  // from it at read time (see utils/access.js withRelationshipFields).
   parentId: { type: String, default: null, index: true },
   partnerIds: [{ type: String }],
   childrenIds: [{ type: String }],
@@ -31,6 +42,7 @@ const personSchema = new mongoose.Schema({
       ret.id = ret._id.toString();
       delete ret._id;
       delete ret.__v;
+      delete ret.createdBy;
     }
   }
 });

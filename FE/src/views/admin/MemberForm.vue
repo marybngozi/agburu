@@ -1,19 +1,20 @@
 <template>
+  <AppShell>
   <div class="max-w-212.5 mx-auto my-8 px-4 font-sans">
     <div class="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between mb-8">
       <h2>{{ isEditMode ? 'Edit Person Profile' : 'Add New Person' }}</h2>
       <button
-        @click="$router.push({ name: 'admin-dashboard' })"
+        @click="$router.push({ name: returnTo })"
         class="bg-transparent border border-slate-300 text-slate-700 px-4 py-2 rounded cursor-pointer dark:border-slate-600 dark:text-slate-100"
       >
-        ← Back to Dashboard
+        ← Back
       </button>
     </div>
 
     <form @submit.prevent="handleSubmit" class="flex flex-col gap-8">
       <!-- SECTION A: Identity & Demographics -->
       <div class="bg-white border border-slate-200 p-5 sm:p-8 rounded-lg shadow-sm dark:bg-slate-900 dark:border-slate-800">
-        <h3 class="mt-0 mb-1 text-slate-900 dark:text-slate-100">Section A: Demographic Identity</h3>
+        <h3 class="mt-0 mb-1 text-slate-900 dark:text-slate-100">About this person</h3>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div class="flex flex-col gap-2 relative">
@@ -94,9 +95,11 @@
       </div>
     </form>
   </div>
+  </AppShell>
 </template>
 
 <script setup>
+import AppShell from '@/components/ui/AppShell.vue';
 import { api } from '@/api';
 import { ref, reactive, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -106,6 +109,14 @@ import { setPageTitle } from '@/composables/useDocumentMeta';
 
 const route = useRoute();
 const router = useRouter();
+
+// Reached from two different places: the platform_admin's global directory
+// (Dashboard.vue / admin-lineages) and a lineage_owner's own "My Lineages"
+// page — see LineageMembersManager's "+ New person" link and the Edit link
+// in its members table, both of which pass ?returnTo=. Falls back to the
+// original hardcoded destination when absent (e.g. Dashboard's own "+ Add
+// New Person" button, which doesn't need to pass anything).
+const returnTo = route.query.returnTo || 'admin-dashboard';
 
 const isEditMode = ref(false);
 const isSaving = ref(false);
@@ -135,7 +146,7 @@ onMounted(async () => {
     isEditMode.value = true;
     await loadMemberData(route.params.id);
   } else {
-    setPageTitle('Add New Person · Agburu Admin');
+    setPageTitle('Add New Person · Agburu');
   }
 });
 
@@ -146,7 +157,7 @@ const loadMemberData = async (id) => {
     if (data) {
       Object.assign(form, data);
       imagePreview.value = form.profilePicture;
-      setPageTitle(`Edit ${data.name} · Agburu Admin`);
+      setPageTitle(`Edit ${data.name} · Agburu`);
     }
   } catch (err) {
     uiError.value = "Failed to pull profile configurations: " + err.message;
@@ -177,11 +188,16 @@ const handleSubmit = async () => {
       await api.updatePerson(route.params.id, formData);
     } else {
       const person = await api.createPerson(formData);
-      router.push({ name: 'admin-lineages', query: { personId: person.id, personName: person.name } });
+      // Either destination is "pick a lineage to connect this new person
+      // to" — just scoped to the admin's full list or the owner's own one.
+      router.push({
+        name: returnTo === 'my-lineages' ? 'my-lineages' : 'admin-lineages',
+        query: { personId: person.id, personName: person.name },
+      });
       return;
     }
 
-    router.push({ name: 'admin-dashboard' });
+    router.push({ name: returnTo });
   } catch (err) {
     uiError.value = "Failed to commit record: " + err.message;
   } finally {

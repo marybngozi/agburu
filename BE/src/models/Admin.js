@@ -5,7 +5,12 @@ const adminSchema = new mongoose.Schema({
   username: { type: String, trim: true, sparse: true, unique: true },
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ['platform_admin', 'profile_editor'], default: 'platform_admin', index: true },
+  // lineage_owner: a self-signed-up user (see authController.signup) who can
+  // create and manage only the lineage(s) they own (see Lineage.ownerId and
+  // requireLineageOwnerOrAdmin) — distinct from platform_admin (full access
+  // to everything) and profile_editor (can only propose edits to their own
+  // assigned Person record).
+  role: { type: String, enum: ['platform_admin', 'profile_editor', 'lineage_owner'], default: 'platform_admin', index: true },
   assignedPersonId: { type: mongoose.Schema.Types.ObjectId, ref: 'Person', default: null, index: true },
   isApproved: { type: Boolean, default: true, index: true },
   isActive: { type: Boolean, default: true, index: true }

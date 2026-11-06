@@ -23,6 +23,12 @@ import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 // lockfile risk, and it only loads once no matter how many editors mount.
 const QUILL_JS = "https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js";
 const QUILL_CSS = "https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css";
+// Subresource Integrity: the browser refuses to run/apply these files if the
+// CDN ever serves anything other than exactly the bytes we vetted. If the
+// Quill version above is bumped, regenerate both hashes:
+//   curl -s <url> | openssl dgst -sha384 -binary | openssl base64 -A
+const QUILL_JS_INTEGRITY = "sha384-utBUCeG4SYaCm4m7GQZYr8Hy8Fpy3V4KGjBZaf4WTKOcwhCYpt/0PfeEe3HNlwx8";
+const QUILL_CSS_INTEGRITY = "sha384-ecIckRi4QlKYya/FQUbBUjS4qp65jF/J87Guw5uzTbO1C1Jfa/6kYmd6dXUF6D7i";
 
 let quillLoadPromise = null;
 function loadQuill() {
@@ -34,6 +40,8 @@ function loadQuill() {
       const link = document.createElement("link");
       link.rel = "stylesheet";
       link.href = QUILL_CSS;
+      link.integrity = QUILL_CSS_INTEGRITY;
+      link.crossOrigin = "anonymous";
       document.head.appendChild(link);
     }
     const existingScript = document.querySelector(`script[src="${QUILL_JS}"]`);
@@ -44,6 +52,8 @@ function loadQuill() {
     }
     const script = document.createElement("script");
     script.src = QUILL_JS;
+    script.integrity = QUILL_JS_INTEGRITY;
+    script.crossOrigin = "anonymous";
     script.async = true;
     script.onload = () => resolve(window.Quill);
     script.onerror = () => reject(new Error("Failed to load the rich text editor."));

@@ -1,4 +1,5 @@
 <template>
+  <AppShell>
   <main class="mx-auto my-8 max-w-225 px-4 font-sans dark:text-slate-100">
     <div class="flex justify-between">
       <div>
@@ -48,8 +49,10 @@
       </article>
     </section>
   </main>
+  </AppShell>
 </template>
 <script setup>
+import AppShell from '@/components/ui/AppShell.vue';
 import { onMounted, reactive, ref } from 'vue'; import { api } from '@/api';
 const form=reactive({username:'',email:'',personId:''}); const search=ref(''); const people=ref([]); const changes=ref([]); const password=ref(''); let timer;
 const load=async()=>{changes.value=await api.getPendingChanges()}; const findPeople=()=>{clearTimeout(timer);timer=setTimeout(async()=>{if(search.value.trim().length<2)return people.value=[];people.value=(await api.getPeople(`search=${encodeURIComponent(search.value)}&limit=8`)).people||[]},250)}; const create=async()=>{const result=await api.createProfileEditor(form);if(result.password)password.value=result.password}; const review=async(id,approved)=>{await api.reviewChange(id,approved);await load()};onMounted(load);
