@@ -262,11 +262,11 @@
     </div>
     <div
       v-if="lineage"
-      class="absolute z-10 right-4 bottom-4 flex flex-col-reverse items-end gap-1.5 rounded-xl"
+      class="absolute z-10 right-4 bottom-4 flex flex-col-reverse gap-1.5 rounded-xl"
       :class="
         edgeControlExpanded
-          ? 'bg-sand-50/95 border border-stone-200 shadow-[0_8px_20px_rgba(0,0,0,0.1)] dark:bg-slate-900 dark:border-slate-800'
-          : 'bg-transparent border border-transparent shadow-none'
+          ? 'items-stretch bg-sand-50/95 border border-stone-200 shadow-[0_8px_20px_rgba(0,0,0,0.1)] dark:bg-slate-900 dark:border-slate-800'
+          : 'items-end bg-transparent border border-transparent shadow-none'
       "
     >
       <button
@@ -274,44 +274,41 @@
         class="flex items-center gap-1.5 rounded-[10px] bg-sand-50/95 border border-stone-200 shadow-[0_8px_20px_rgba(0,0,0,0.1)] font-sans font-semibold text-forest-900 cursor-pointer hover:border-stone-300 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100 dark:hover:border-clay-400"
         :class="
           edgeControlExpanded
-            ? 'px-3 py-2.5 text-[0.78rem]'
+            ? 'justify-center px-3 py-2.5 text-[0.78rem]'
             : 'p-2 text-base'
         "
         :aria-expanded="edgeControlExpanded"
         :aria-label="
           edgeControlExpanded
-            ? 'Collapse connector style'
-            : 'Choose connector style'
+            ? 'Collapse map style'
+            : 'Choose map style'
         "
         @click="edgeControlExpanded = !edgeControlExpanded"
       >
         <span aria-hidden="true">🌿</span>
-        <span v-if="edgeControlExpanded">Connector style</span>
+        <span v-if="edgeControlExpanded">Map style</span>
       </button>
-      <label v-if="edgeControlExpanded" class="flex flex-col items-stretch gap-1 px-3 text-[0.7rem] font-semibold text-stone-500 dark:text-slate-400">
-        Layout
-        <select
-          v-model="layoutMode"
-          class="px-2 py-1.5 border border-stone-300 rounded-lg bg-white text-forest-900 font-sans font-semibold text-[0.78rem] dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
-        >
-          <option value="spread">Spread (wide rows)</option>
-          <option value="branches">Branches (compact tree)</option>
-        </select>
-      </label>
-      <label v-if="edgeControlExpanded" class="flex items-center px-3 pb-3">
-        <select
-          v-model="edgeStyle"
-          class="px-2 py-1.5 border border-stone-300 rounded-lg bg-white text-forest-900 font-sans font-semibold text-[0.78rem] dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
-        >
-          <option
-            v-for="option in EDGE_STYLE_OPTIONS"
-            :key="option.value"
-            :value="option.value"
-          >
-            {{ option.label }}
-          </option>
-        </select>
-      </label>
+      <div v-if="edgeControlExpanded" class="grid w-56 gap-3 px-3 pt-3 pb-1">
+        <label class="grid gap-1 text-[0.7rem] font-semibold uppercase tracking-wide text-stone-500 dark:text-slate-400">
+          Connector
+          <select v-model="edgeStyle" class="px-2 py-1.5 border border-stone-300 rounded-lg bg-white text-forest-900 font-sans font-semibold text-[0.78rem] dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100">
+            <option
+              v-for="option in EDGE_STYLE_OPTIONS"
+              :key="option.value"
+              :value="option.value"
+            >
+              {{ option.label }}
+            </option>
+          </select>
+        </label>
+        <label class="grid gap-1 text-[0.7rem] font-semibold uppercase tracking-wide text-stone-500 dark:text-slate-400">
+          Layout
+          <select v-model="layoutMode" class="px-2 py-1.5 border border-stone-300 rounded-lg bg-white text-forest-900 font-sans font-semibold text-[0.78rem] dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100">
+            <option value="spread">Spread (wide rows)</option>
+            <option value="branches">Branches (compact tree)</option>
+          </select>
+        </label>
+      </div>
     </div>
     <QuickAddModal
       v-if="quickAdd"
