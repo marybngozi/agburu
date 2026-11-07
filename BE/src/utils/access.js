@@ -70,6 +70,7 @@ export const withRelationshipFields = async (people, visibleLineageIds) => {
     return {
       ...person,
       parentId: [...entry.parents][0] || null,
+      parentIds: [...entry.parents],
       childrenIds: [...entry.children],
       partnerIds: [...entry.partners]
     };

@@ -142,6 +142,27 @@ export function useLineage() {
     });
   };
 
+  // A child hangs under one parent; if they have a second one, attach that
+  // person (name/photo) as `otherParent` so the card can show a small badge.
+  const withOtherParents = async (children, treeParentId) => {
+    const otherIdOf = (child) => (child.parentIds || []).find((id) => id !== treeParentId);
+    const wanted = [...new Set(children.map(otherIdOf).filter(Boolean))];
+    if (!wanted.length) return children;
+    let found = [];
+    try {
+      found = await api.getPeopleByIds(wanted);
+    } catch {
+      return children;
+    }
+    const byId = new Map(found.map((person) => [person.id, person]));
+    return children.map((child) => {
+      const other = byId.get(otherIdOf(child));
+      return other
+        ? { ...child, otherParent: { id: other.id, name: other.name, gender: other.gender, profilePicture: other.profilePicture } }
+        : child;
+    });
+  };
+
   const loadInitialTree = async (rootPersonId) => {
     isLoading.value = true;
     error.value = null;
@@ -159,7 +180,7 @@ export function useLineage() {
       if (rootData.childrenIds?.length) {
         const visibleIds = rootData.childrenIds.slice(0, MAX_VISIBLE_CHILDREN);
         const hiddenIds = rootData.childrenIds.slice(MAX_VISIBLE_CHILDREN);
-        const children = await api.getPeopleByIds(visibleIds);
+        const children = await withOtherParents(await api.getPeopleByIds(visibleIds), rootData.id);
         children.forEach((child) => {
           localNodes.push({
             id: child.id,
@@ -225,7 +246,7 @@ export function useLineage() {
       const parentNode = nodes.value.find((n) => n.id === parentNodeId);
       if (parentNode) parentNode.data.isExpanded = true;
 
-      const children = await api.getPeopleByIds(childrenIds);
+      const children = await withOtherParents(await api.getPeopleByIds(childrenIds), parentNodeId);
       const nextNodes = [...nodes.value];
       const nextEdges = [...edges.value];
 
