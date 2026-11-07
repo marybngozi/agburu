@@ -6,14 +6,14 @@
     <!-- The child's other parent (a spouse of the parent they hang under) -->
     <div
       v-if="data.otherParent"
-      class="absolute -top-3 -right-3 rounded-full ring-2 ring-white dark:ring-slate-900"
+      class="absolute top-1.5 right-1.5 rounded-full ring-1 ring-white dark:ring-slate-900"
       :title="`${data.otherParent.gender === 'female' ? 'Mother' : data.otherParent.gender === 'male' ? 'Father' : 'Other parent'}: ${data.otherParent.name}`"
     >
-      <Avatar :src="data.otherParent.profilePicture" :name="data.otherParent.name" :size="30" />
+      <Avatar :src="data.otherParent.profilePicture" :name="data.otherParent.name" :size="22" />
     </div>
 
     <!-- Node Content Area -->
-    <div class="mb-3 flex items-center gap-3">
+    <div :class="['mb-3 flex items-center gap-3', data.otherParent && 'pr-5']">
       <Avatar
         :src="data.profilePicture"
         :name="data.name"
