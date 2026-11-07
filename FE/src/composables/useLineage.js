@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { nextTick, ref } from "vue";
 import { api } from "@/api";
 import { hierarchy, tree } from "d3-hierarchy";
 
@@ -275,15 +275,46 @@ export function useLineage() {
     }
   };
 
-  // Swaps a "see more" marker for its real children, reusing the same
-  // fetch-and-place logic expandChildBranch already does.
+  // Vue Flow keeps a node's old `data` when a node with the same id comes
+  // straight back, so clear first to make it pick up the marker's new label.
+  const replaceNodes = async (next) => {
+    nodes.value = [];
+    await nextTick();
+    nodes.value = next;
+  };
+
+  // "See more" loads the remaining children and turns the marker into a
+  // "Show fewer" toggle (kept at the end of the row) instead of removing it.
   const revealHiddenChildren = async (parentNodeId, hiddenIds) => {
     await expandChildBranch(parentNodeId, hiddenIds);
     const markerId = `more-${parentNodeId}`;
-    const nextNodes = nodes.value.filter((node) => node.id !== markerId);
-    const nextEdges = edges.value.filter((edge) => edge.id !== `more-edge-${parentNodeId}`);
+    const markerEdgeId = `more-edge-${parentNodeId}`;
+    const nextNodes = nodes.value.map((node) =>
+      node.id === markerId ? { ...node, data: { ...node.data, expanded: true } } : node,
+    );
+    const markerEdge = edges.value.find((edge) => edge.id === markerEdgeId);
+    const nextEdges = [...edges.value.filter((edge) => edge.id !== markerEdgeId), ...(markerEdge ? [markerEdge] : [])];
     edges.value = withEdgeStrokeWidths(nextNodes, nextEdges);
-    nodes.value = calculateLayout(nextNodes, nextEdges);
+    await replaceNodes(calculateLayout(nextNodes, nextEdges));
+  };
+
+  // "Show fewer": drops the children that "See more" added (and anything
+  // opened beneath them) and puts the marker back to "See more".
+  const hideRevealedChildren = async (parentNodeId, hiddenIds) => {
+    const doomed = new Set();
+    const collect = (id) => {
+      if (doomed.has(id)) return;
+      doomed.add(id);
+      edges.value.filter((edge) => edge.source === id).forEach((edge) => collect(edge.target));
+    };
+    hiddenIds.forEach(collect);
+    const markerId = `more-${parentNodeId}`;
+    const nextNodes = nodes.value
+      .filter((node) => !doomed.has(node.id))
+      .map((node) => (node.id === markerId ? { ...node, data: { ...node.data, expanded: false } } : node));
+    const nextEdges = edges.value.filter((edge) => !doomed.has(edge.target));
+    edges.value = withEdgeStrokeWidths(nextNodes, nextEdges);
+    await replaceNodes(calculateLayout(nextNodes, nextEdges));
   };
 
   const collapseChildBranch = (parentNodeId) => {
@@ -324,5 +355,6 @@ export function useLineage() {
     expandChildBranch,
     collapseChildBranch,
     revealHiddenChildren,
+    hideRevealedChildren,
   };
 }

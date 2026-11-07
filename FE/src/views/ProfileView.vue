@@ -255,6 +255,7 @@ const {
   expandChildBranch,
   collapseChildBranch,
   revealHiddenChildren,
+  hideRevealedChildren,
 } = useLineage();
 
 // Rendered with v-html, so sanitized again here even though the server
@@ -357,7 +358,8 @@ const handleCollapseBranch = (id) => collapseChildBranch(id);
 const handleShowRemainingChildren = async (parentId) => {
   const marker = nodes.value.find((node) => node.id === `more-${parentId}`);
   if (!marker) return;
-  await revealHiddenChildren(parentId, marker.data.hiddenIds);
+  if (marker.data.expanded) await hideRevealedChildren(parentId, marker.data.hiddenIds);
+  else await revealHiddenChildren(parentId, marker.data.hiddenIds);
 };
 
 const hotReloadWorkspaceId = (personProps) => {

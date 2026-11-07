@@ -538,6 +538,17 @@ const layout = (people, relationships) => {
       childrenByParentId.get(personId).length;
     if (hiddenCount > 0) {
       childBranches.push({ moreMarker: true, parentId: personId, hiddenCount });
+    } else if (
+      expandedParentIds.value.has(personId) &&
+      allChildrenByParentId.get(personId).length > MAX_VISIBLE_CHILDREN
+    ) {
+      // Everything is showing: leave a marker so it can be folded away again.
+      childBranches.push({
+        moreMarker: true,
+        expanded: true,
+        parentId: personId,
+        hiddenCount: allChildrenByParentId.get(personId).length - MAX_VISIBLE_CHILDREN,
+      });
     }
     return {
       person,
@@ -579,6 +590,7 @@ const layout = (people, relationships) => {
         moreMarkers.push({
           parentId: node.data.parentId,
           hiddenCount: node.data.hiddenCount,
+          expanded: !!node.data.expanded,
           x: node.x + forestOffset,
           y: node.y,
         });
@@ -626,7 +638,7 @@ const layout = (people, relationships) => {
     ...moreMarkers.map((marker) => ({
       id: `more-${marker.parentId}`,
       type: "seeMore",
-      data: { parentId: marker.parentId, hiddenCount: marker.hiddenCount },
+      data: { parentId: marker.parentId, hiddenCount: marker.hiddenCount, expanded: marker.expanded },
       position: { x: marker.x - 70, y: marker.y - 58 },
     })),
   ];
@@ -754,8 +766,11 @@ watch(layoutMode, async (mode) => {
 const openProfile = (person) => {
   selectedPerson.value = person;
 };
+// The marker toggles: "See more" reveals the rest, "Show fewer" folds them.
 const showRemainingChildren = (parentId) => {
-  expandedParentIds.value = new Set([...expandedParentIds.value, parentId]);
+  const next = new Set(expandedParentIds.value);
+  if (!next.delete(parentId)) next.add(parentId);
+  expandedParentIds.value = next;
   layout(rawPeople.value, rawRelationships.value);
 };
 const connectPerson = (person) => {
