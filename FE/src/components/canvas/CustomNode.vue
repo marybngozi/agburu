@@ -56,21 +56,29 @@
         ℹ️ Info
       </button>
 
-      <div v-if="data.canManage" class="relative">
+      <div v-if="data.canManage || data.canEdit" class="relative">
         <button
           type="button"
           class="cursor-pointer rounded bg-emerald-50 px-1.5 py-1 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-300"
-          title="Add a relative"
+          :title="data.canManage ? 'Add a relative or edit' : 'Edit this person'"
           @click.stop="showAddMenu = !showAddMenu"
         >
-          + Add
+          {{ data.canManage ? "+ Add" : "✎ Edit" }}
         </button>
         <div
           v-if="showAddMenu"
-          class="absolute bottom-full left-0 z-50 mb-1 grid w-28 overflow-hidden rounded-md border border-gray-200 bg-white text-xs shadow-lg dark:border-slate-700 dark:bg-slate-900"
+          class="absolute bottom-full left-0 z-50 mb-1 grid w-32 overflow-hidden rounded-md border border-gray-200 bg-white text-xs shadow-lg dark:border-slate-700 dark:bg-slate-900"
         >
           <button
-            v-for="option in ADD_OPTIONS"
+            v-if="data.canEdit"
+            type="button"
+            class="cursor-pointer border-0 border-b border-gray-100 bg-transparent px-3 py-2 text-left font-semibold text-gray-800 hover:bg-gray-100 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800"
+            @click.stop="chooseEdit"
+          >
+            ✎ Edit
+          </button>
+          <button
+            v-for="option in data.canManage ? ADD_OPTIONS : []"
             :key="option.value"
             type="button"
             class="cursor-pointer border-0 bg-transparent px-3 py-2 text-left text-gray-800 hover:bg-gray-100 dark:text-slate-100 dark:hover:bg-slate-800"
@@ -130,7 +138,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["show-info", "quick-add"]);
+const emit = defineEmits(["show-info", "quick-add", "quick-edit"]);
 const showAddMenu = ref(false);
 const ADD_OPTIONS = [
   { value: "child", label: "+ Child" },
@@ -140,6 +148,10 @@ const ADD_OPTIONS = [
 const chooseAdd = (relation) => {
   showAddMenu.value = false;
   emit("quick-add", { person: props.data, relation });
+};
+const chooseEdit = () => {
+  showAddMenu.value = false;
+  emit("quick-edit", props.data);
 };
 const showSpouseDrawer = ref(false);
 const toggleSpouseDrawer = () => {

@@ -133,5 +133,10 @@ export const api = {
   createPerson: (formData) => request("/people", { method: "POST", body: formData, multipart: true }),
   updatePerson: (id, formData) =>
     request(`/people/${id}`, { method: "PUT", body: formData, multipart: true }),
+  setOtherParent: (lineageId, childPersonId, otherParentId) =>
+    request(`/lineages/${lineageId}/children/${childPersonId}/other-parent`, {
+      method: "PUT",
+      body: { otherParentId: otherParentId || null },
+    }),
   softDelete: (id, isDeleted) => patch(`/people/${id}/soft-delete`, { isDeleted }),
 };

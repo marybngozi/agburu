@@ -180,7 +180,7 @@
       @node-click="handleNodeClick"
     >
       <template #node-custom="nodeProps">
-        <CustomNode v-bind="nodeProps" @show-info="openProfile" @quick-add="openQuickAdd" />
+        <CustomNode v-bind="nodeProps" @show-info="openProfile" @quick-add="openQuickAdd" @quick-edit="openQuickEdit" />
       </template>
       <template #node-seeMore="nodeProps">
         <SeeMoreNode
@@ -303,6 +303,17 @@
         </label>
       </div>
     </div>
+    <QuickEditModal
+      v-if="quickEdit"
+      :key="quickEdit.person.id"
+      :person="quickEdit.person"
+      :lineage-id="lineage?.id"
+      :tree-parent-id="quickEdit.treeParentId"
+      :spouse-ids="quickEdit.spouseIds"
+      :known-people="rawPeople"
+      @close="quickEdit = null"
+      @saved="onQuickEdited"
+    />
     <QuickAddModal
       v-if="quickAdd"
       :lineage-id="lineage.id"
@@ -340,6 +351,7 @@ import SeeMoreNode from "@/components/canvas/SeeMoreNode.vue";
 import BranchEdge from "@/components/canvas/BranchEdge.vue";
 import BaseModal from "@/components/ui/BaseModal.vue";
 import QuickAddModal from "@/components/ui/QuickAddModal.vue";
+import QuickEditModal from "@/components/ui/QuickEditModal.vue";
 import Avatar from "@/components/ui/Avatar.vue";
 import ThemeToggle from "@/components/ui/ThemeToggle.vue";
 import { setPageTitle, withSiteSuffix } from "@/composables/useDocumentMeta";
@@ -362,6 +374,7 @@ const unconnectedExpanded = ref(
   typeof window === "undefined" || window.innerWidth > 720,
 );
 const quickAdd = ref(null);
+const quickEdit = ref(null);
 const highlightId = ref(null);
 const treeSearch = ref("");
 const editingStory = ref(false);
@@ -630,6 +643,7 @@ const layout = (people, relationships) => {
             partnerIds: [...partnersByPersonId.get(person.id)],
             otherParent: otherParentByChildId.get(person.id) || null,
             canManage: !!lineage.value?.canManage,
+            canEdit: !!person.canEdit,
             highlight: person.id === highlightId.value,
           },
           position: { x: point.x - 130, y: point.y - 58 },
@@ -784,6 +798,31 @@ const connectPerson = (person) => {
 };
 const openQuickAdd = ({ person, relation }) => {
   quickAdd.value = { anchor: person, relation };
+};
+// Editing a person: find the parent they hang under, whose spouses are the
+// choices for the child's "other parent".
+const openQuickEdit = (person) => {
+  const isOnTree = (id) => rawPeople.value.some((p) => p.id === id && p.modeOfJoining !== "married");
+  const link = rawRelationships.value.find(
+    (relationship) =>
+      relationship.type === "parent_child" &&
+      relationship.childPersonId === person.id &&
+      isOnTree(relationship.parentPersonId),
+  );
+  const parentNode = link && nodes.value.find((node) => node.id === link.parentPersonId);
+  quickEdit.value = {
+    person,
+    treeParentId: link?.parentPersonId || "",
+    spouseIds: parentNode?.data.partnerIds || [],
+  };
+};
+const onQuickEdited = async () => {
+  quickEdit.value = null;
+  try {
+    await loadTree();
+  } catch (requestError) {
+    error.value = requestError.message;
+  }
 };
 const onQuickAdded = async () => {
   const wasEmpty = !rawPeople.value.length;
