@@ -37,6 +37,16 @@
             </div>
           </div>
         </div>
+        <label
+          v-if="members.length && quick.relation === 'child' && quickSpouses.length"
+          class="grid gap-1 text-[0.72rem] font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400"
+        >
+          Other parent
+          <select v-model="quick.otherParentId" required class="field-input normal-case">
+            <option v-if="quickSpouses.length > 1" value="" disabled>Choose a spouse…</option>
+            <option v-for="spouse in quickSpouses" :key="spouse.id" :value="spouse.id">{{ spouse.name }}</option>
+          </select>
+        </label>
         <div class="grid gap-3 sm:grid-cols-[1fr_auto_auto]">
           <input
             v-model="quick.name"
@@ -382,9 +392,26 @@ const QUICK_OPTIONS = [
   { value: "spouse", label: "Spouse" },
   { value: "parent", label: "Parent" },
 ];
-const quick = reactive({ anchor: "", relation: "child", name: "", gender: "male", birthDate: "" });
+const quick = reactive({ anchor: "", relation: "child", name: "", gender: "male", birthDate: "", otherParentId: "" });
 const quickSaving = ref(false);
 const quickMessage = ref("");
+// Spouses of whoever the new child is being added to.
+const quickSpouses = computed(() => {
+  const ids = new Set();
+  tree.value.relationships.forEach((relationship) => {
+    if (relationship.type === "marriage" && relationship.personIds.includes(quick.anchor)) {
+      relationship.personIds.forEach((id) => id !== quick.anchor && ids.add(id));
+    }
+  });
+  return tree.value.people.filter((person) => ids.has(person.id));
+});
+// One spouse is the obvious other parent; several means the user must pick.
+watch(
+  () => [quick.anchor, quickSpouses.value.length],
+  () => {
+    quick.otherParentId = quickSpouses.value.length === 1 ? quickSpouses.value[0].id : "";
+  },
+);
 const quickLabel = computed(() => {
   if (!members.value.length) return "Add as root";
   return `Add ${quick.relation}`;
@@ -588,6 +615,8 @@ const submitQuickAdd = async () => {
     const result = await api.quickAddPerson(props.lineage._id, {
       relation: isFirst ? "root" : quick.relation,
       anchorPersonId: isFirst ? undefined : quick.anchor,
+      otherParentId:
+        !isFirst && quick.relation === "child" && quickSpouses.value.length ? quick.otherParentId : undefined,
       person: { name: quick.name, gender: quick.gender, birthDate: quick.birthDate },
     });
     quickMessage.value = `Added ${result.person.name}.`;

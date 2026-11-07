@@ -140,14 +140,7 @@
             class="flex-1 min-w-0 p-1.5 flex items-center gap-2 text-forest-900 bg-white border border-stone-200 rounded-lg text-[0.76rem] font-semibold text-left cursor-pointer hover:border-stone-300 hover:bg-stone-50 dark:text-slate-100 dark:bg-slate-900 dark:border-slate-800 dark:hover:border-slate-700 dark:hover:bg-slate-800"
             @click="openProfile(person)"
           >
-            <img
-              :src="
-                person.profilePicture ||
-                'https://placehold.co/72x72?text=No+Photo'
-              "
-              alt=""
-              class="w-6.5 h-6.5 rounded-full object-cover bg-stone-200 shrink-0 dark:bg-slate-800"
-            />
+            <Avatar :src="person.profilePicture" :name="person.name" :size="26" />
             <span class="flex-1 truncate">{{ person.name }}</span>
             <b
               aria-hidden="true"
@@ -315,6 +308,7 @@
       :lineage-id="lineage.id"
       :anchor="quickAdd.anchor"
       :initial-relation="quickAdd.relation === 'root' ? 'child' : quickAdd.relation"
+      :spouses="spousesOf(quickAdd.anchor)"
       @close="quickAdd = null"
       @added="onQuickAdded"
     />
@@ -345,6 +339,7 @@ import SeeMoreNode from "@/components/canvas/SeeMoreNode.vue";
 import BranchEdge from "@/components/canvas/BranchEdge.vue";
 import BaseModal from "@/components/ui/BaseModal.vue";
 import QuickAddModal from "@/components/ui/QuickAddModal.vue";
+import Avatar from "@/components/ui/Avatar.vue";
 import ThemeToggle from "@/components/ui/ThemeToggle.vue";
 import { setPageTitle, withSiteSuffix } from "@/composables/useDocumentMeta";
 
@@ -463,6 +458,24 @@ const layout = (people, relationships) => {
       if (partnersByPersonId.has(secondPersonId))
         partnersByPersonId.get(secondPersonId).add(firstPersonId);
     });
+
+  // A child is drawn under one parent; if their other parent is a spouse who
+  // isn't a node on the tree, remember who, so the card can show a small badge.
+  const allPeopleById = new Map(people.map((person) => [person.id, person]));
+  const otherParentByChildId = new Map();
+  relationships.forEach((relationship) => {
+    if (relationship.type !== "parent_child") return;
+    if (peopleById.has(relationship.parentPersonId)) return;
+    const parent = allPeopleById.get(relationship.parentPersonId);
+    if (parent && !otherParentByChildId.has(relationship.childPersonId)) {
+      otherParentByChildId.set(relationship.childPersonId, {
+        id: parent.id,
+        name: parent.name,
+        gender: parent.gender,
+        profilePicture: parent.profilePicture,
+      });
+    }
+  });
 
   const treeRelationships = relationships.filter(
     (relationship) =>
@@ -602,6 +615,7 @@ const layout = (people, relationships) => {
           data: {
             ...person,
             partnerIds: [...partnersByPersonId.get(person.id)],
+            otherParent: otherParentByChildId.get(person.id) || null,
             canManage: !!lineage.value?.canManage,
             highlight: person.id === highlightId.value,
           },
@@ -751,6 +765,12 @@ const connectPerson = (person) => {
         : "admin-lineages",
     query: { lineageId: lineage.value?.id, connectPersonId: person.id },
   });
+};
+// The people the anchor is married to, for the child's "other parent" choice.
+const spousesOf = (anchor) => {
+  if (!anchor) return [];
+  const ids = new Set(anchor.partnerIds || []);
+  return rawPeople.value.filter((person) => ids.has(person.id));
 };
 const openQuickAdd = ({ person, relation }) => {
   quickAdd.value = { anchor: person, relation };

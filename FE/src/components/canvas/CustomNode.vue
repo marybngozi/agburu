@@ -3,14 +3,22 @@
     class="relative box-border w-65 rounded-lg border-t-2 border-r-2 border-b-2 border-t-gray-300 border-r-gray-300 border-b-gray-300 bg-white p-3 font-sans dark:border-t-slate-700 dark:border-r-slate-700 dark:border-b-slate-700 dark:bg-slate-900"
     :class="[genderBorderClass, nodeShadowClass, data.highlight && 'ring-4 ring-amber-400']"
   >
+    <!-- The child's other parent (a spouse of the parent they hang under) -->
+    <div
+      v-if="data.otherParent"
+      class="absolute -top-3 -right-3 rounded-full ring-2 ring-white dark:ring-slate-900"
+      :title="`${data.otherParent.gender === 'female' ? 'Mother' : data.otherParent.gender === 'male' ? 'Father' : 'Other parent'}: ${data.otherParent.name}`"
+    >
+      <Avatar :src="data.otherParent.profilePicture" :name="data.otherParent.name" :size="30" />
+    </div>
+
     <!-- Node Content Area -->
     <div class="mb-3 flex items-center gap-3">
-      <img
-        :src="
-          data.profilePicture || 'https://placehold.co/100x100?text=No+Photo'
-        "
-        alt="Avatar"
-        class="h-12.5 w-12.5 rounded-full border-2 border-gray-100 bg-gray-100 object-cover dark:border-slate-800 dark:bg-slate-800"
+      <Avatar
+        :src="data.profilePicture"
+        :name="data.name"
+        :size="50"
+        class="border-2 border-gray-100 dark:border-slate-800"
       />
 
       <div class="flex flex-1 flex-col gap-0.5 overflow-hidden">
@@ -113,6 +121,7 @@
 <script setup>
 import { ref, computed } from "vue";
 import SpouseOverlay from "@/components/canvas/SpouseOverlay.vue";
+import Avatar from "@/components/ui/Avatar.vue";
 // props passed automatically by Vue Flow mapping layout core engines
 const props = defineProps({
   data: {

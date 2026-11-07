@@ -246,6 +246,20 @@ export const quickAddPerson = async (req, res) => {
     if (!lineage) return res.status(404).json({ message: 'Lineage not found' });
     if (lineage.status !== 'approved') return res.status(400).json({ message: 'This lineage is not approved yet' });
 
+    // For a child: if the anchor has any spouse, the child's other parent must
+    // be chosen from them (so each child is tied to one marriage).
+    let otherParentId = null;
+    if (relation === 'child' && mongoose.isValidObjectId(anchorPersonId)) {
+      const marriages = await Relationship.find({ lineageId: lineage._id, type: 'marriage', personIds: anchorPersonId }).lean();
+      const spouseIds = marriages.flatMap((marriage) => marriage.personIds.map(String)).filter((id) => id !== String(anchorPersonId));
+      if (spouseIds.length) {
+        const chosen = String(req.body.otherParentId || '');
+        if (!chosen) return res.status(400).json({ message: 'Choose the child\'s other parent' });
+        if (!spouseIds.includes(chosen)) return res.status(400).json({ message: 'The other parent must be a spouse of this person' });
+        otherParentId = chosen;
+      }
+    }
+
     const memberCount = await LineageMember.countDocuments({ lineageId: lineage._id, isDeleted: false });
     if (relation === 'root') {
       if (memberCount) return res.status(400).json({ message: 'This lineage already has members' });
@@ -279,6 +293,10 @@ export const quickAddPerson = async (req, res) => {
       if (relation === 'child') {
         const childOrder = await Relationship.countDocuments({ ...base, type: 'parent_child', parentPersonId: anchorPersonId });
         await Relationship.create({ ...base, type: 'parent_child', parentPersonId: anchorPersonId, childPersonId: person._id, childOrder });
+        if (otherParentId) {
+          const otherOrder = await Relationship.countDocuments({ ...base, type: 'parent_child', parentPersonId: otherParentId });
+          await Relationship.create({ ...base, type: 'parent_child', parentPersonId: otherParentId, childPersonId: person._id, childOrder: otherOrder });
+        }
       } else if (relation === 'parent') {
         const childOrder = await Relationship.countDocuments({ ...base, type: 'parent_child', parentPersonId: person._id });
         await Relationship.create({ ...base, type: 'parent_child', parentPersonId: person._id, childPersonId: anchorPersonId, childOrder });

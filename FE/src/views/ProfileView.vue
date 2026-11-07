@@ -38,13 +38,11 @@
         class="w-full md:w-95 max-h-[45vh] md:max-h-none border-b md:border-b-0 md:border-r border-slate-200 px-4 md:px-6 py-5 md:py-8 bg-white overflow-y-auto flex flex-col gap-6 box-border dark:bg-slate-900 dark:border-slate-800"
       >
         <div class="flex gap-4 items-center">
-          <img
-            :src="
-              person.profilePicture ||
-              'https://placehold.co/150x150?text=No+Photo'
-            "
-            alt="Profile Picture"
-            class="w-20 h-20 rounded-full object-cover border-2 border-slate-200"
+          <Avatar
+            :src="person.profilePicture"
+            :name="person.name"
+            :size="80"
+            class="border-2 border-slate-200"
           />
           <div>
             <div class="flex gap-1">
@@ -222,6 +220,7 @@
 </template>
 
 <script setup>
+import Avatar from "@/components/ui/Avatar.vue";
 import { ref, computed, onMounted, watch, markRaw } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { VueFlow } from "@vue-flow/core";

@@ -17,14 +17,7 @@
       class="flex items-center justify-between gap-2 rounded-md border border-pink-200 bg-white p-2 dark:border-pink-900 dark:bg-slate-900 p-1.5"
     >
       <div class="flex min-w-0 items-center gap-2">
-        <img
-          :src="
-            partner.profilePicture ||
-            'https://placehold.co/100x100?text=No+Photo'
-          "
-          alt="Spouse avatar"
-          class="h-7 w-7 rounded-full bg-gray-200 object-cover"
-        />
+        <Avatar :src="partner.profilePicture" :name="partner.name" :size="28" />
         <div class="flex flex-col overflow-hidden">
           <span
             v-if="partner.titledName"
@@ -51,6 +44,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { api } from "@/api";
+import Avatar from "@/components/ui/Avatar.vue";
 
 const props = defineProps({
   partnerIds: {

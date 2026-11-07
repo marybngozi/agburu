@@ -111,13 +111,11 @@
             :class="[member.isDeleted ? 'bg-red-50 dark:bg-red-400/[0.08]' : 'hover:bg-slate-50 dark:hover:bg-slate-800/40']"
           >
             <td class="border-b border-gray-100 px-4 py-3.5 text-gray-600 dark:border-slate-800 dark:text-slate-400">
-              <img
-                :src="
-                  member.profilePicture ||
-                  'https://placehold.co/100x100?text=No+Photo'
-                "
-                alt="Avatar"
-                class="h-10 w-10 rounded-full border border-gray-200 object-cover dark:border-slate-800"
+              <Avatar
+                :src="member.profilePicture"
+                :name="member.name"
+                :size="40"
+                class="border border-gray-200 dark:border-slate-800"
               />
             </td>
             <td class="border-b border-gray-100 px-4 py-3.5 text-gray-600 dark:border-slate-800 dark:text-slate-400">
@@ -191,6 +189,7 @@ import { useRouter } from "vue-router";
 import { api } from "@/api";
 import PaginationSummary from "@/components/ui/PaginationSummary.vue";
 import PaginationControls from "@/components/ui/PaginationControls.vue";
+import Avatar from "@/components/ui/Avatar.vue";
 
 const router = useRouter();
 

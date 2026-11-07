@@ -36,6 +36,17 @@
         </button>
       </div>
 
+      <label
+        v-if="relation === 'child' && spouses.length"
+        class="mt-4 grid gap-1 text-[0.72rem] font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400"
+      >
+        Other parent
+        <select v-model="otherParentId" required class="field-input normal-case">
+          <option v-if="spouses.length > 1" value="" disabled>Choose a spouse…</option>
+          <option v-for="spouse in spouses" :key="spouse.id" :value="spouse.id">{{ spouse.name }}</option>
+        </select>
+      </label>
+
       <div class="mt-4 grid gap-3">
         <input ref="nameInput" v-model="name" required maxlength="200" placeholder="Full name" class="field-input" />
         <div class="flex items-center gap-5 text-sm text-slate-700 dark:text-slate-200">
@@ -69,6 +80,8 @@ const props = defineProps({
   // The person being added to; null means the lineage is empty (add root).
   anchor: { type: Object, default: null },
   initialRelation: { type: String, default: "child" },
+  // The anchor's spouses — the child's other parent is chosen from these.
+  spouses: { type: Array, default: () => [] },
 });
 const emit = defineEmits(["close", "added"]);
 
@@ -78,6 +91,8 @@ const OPTIONS = [
   { value: "parent", label: "Parent" },
 ];
 const relation = ref(props.initialRelation);
+// One spouse is the obvious other parent; with several, the user must choose.
+const otherParentId = ref(props.spouses.length === 1 ? props.spouses[0].id : "");
 const name = ref("");
 const gender = ref("male");
 const birthDate = ref("");
@@ -94,6 +109,7 @@ const submit = async () => {
     await api.quickAddPerson(props.lineageId, {
       relation: props.anchor ? relation.value : "root",
       anchorPersonId: props.anchor?.id,
+      otherParentId: relation.value === "child" && props.spouses.length ? otherParentId.value : undefined,
       person: { name: name.value, gender: gender.value, birthDate: birthDate.value },
     });
     emit("added");

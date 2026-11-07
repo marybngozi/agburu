@@ -14,10 +14,11 @@
 
       <div class="max-h-[60vh] overflow-y-auto p-6">
         <div class="flex items-center gap-6">
-          <img
-            :src="activePerson.profilePicture || 'https://placehold.co/150x150?text=No+Photo'"
-            alt="Profile Avatar"
-            class="h-25 w-25 rounded-full border-[3px] border-slate-100 bg-slate-50 object-cover dark:border-slate-800 dark:bg-slate-800"
+          <Avatar
+            :src="activePerson.profilePicture"
+            :name="activePerson.name"
+            :size="100"
+            class="border-[3px] border-slate-100 dark:border-slate-800"
           />
 
           <div class="flex flex-1 flex-col gap-2">
@@ -63,6 +64,7 @@
 </template>
 
 <script setup>
+import Avatar from "@/components/ui/Avatar.vue";
 import { useRouter } from 'vue-router';
 
 const props = defineProps({
