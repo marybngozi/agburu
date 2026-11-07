@@ -87,9 +87,9 @@
         class="cursor-pointer rounded px-2 py-1 text-xs font-medium text-pink-800 bg-pink-100 hover:bg-pink-200"
         @click="toggleSpouseDrawer"
       >
-        ♡ Spouse{{ data.partnerIds.length > 1 ? "s" : "" }} ({{
-          data.partnerIds.length
-        }})
+        ♡ Spouse{{
+          data.partnerIds.length > 1 ? `s (${data.partnerIds.length})` : ""
+        }}
       </button>
     </div>
 

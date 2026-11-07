@@ -61,7 +61,7 @@
         <button type="button" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100" @click="$emit('close')">Cancel</button>
         <button
           type="submit"
-          :disabled="saving"
+          :disabled="saving || loadingSpouses"
           class="rounded-md bg-slate-900 px-4 py-2 text-sm text-white hover:bg-slate-800 disabled:opacity-50 dark:bg-slate-700"
         >
           {{ saving ? "Adding…" : anchor ? `Add ${relation}` : "Add as root" }}
@@ -74,14 +74,17 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { api } from "@/api";
+import { resolvePeople } from "@/composables/resolvePeople";
 
 const props = defineProps({
   lineageId: { type: String, required: true },
   // The person being added to; null means the lineage is empty (add root).
   anchor: { type: Object, default: null },
   initialRelation: { type: String, default: "child" },
-  // The anchor's spouses — the child's other parent is chosen from these.
-  spouses: { type: Array, default: () => [] },
+  // Ids of the anchor's spouses (the child's other parent is chosen from
+  // them) and the people already loaded, so only unknown ones are fetched.
+  spouseIds: { type: Array, default: () => [] },
+  knownPeople: { type: Array, default: () => [] },
 });
 const emit = defineEmits(["close", "added"]);
 
@@ -92,7 +95,14 @@ const OPTIONS = [
 ];
 const relation = ref(props.initialRelation);
 // One spouse is the obvious other parent; with several, the user must choose.
-const otherParentId = ref(props.spouses.length === 1 ? props.spouses[0].id : "");
+const spouses = ref([]);
+const otherParentId = ref("");
+const loadingSpouses = ref(props.spouseIds.length > 0);
+resolvePeople(props.spouseIds, props.knownPeople).then((found) => {
+  spouses.value = found;
+  if (found.length === 1) otherParentId.value = found[0].id;
+  loadingSpouses.value = false;
+});
 const name = ref("");
 const gender = ref("male");
 const birthDate = ref("");
@@ -109,7 +119,7 @@ const submit = async () => {
     await api.quickAddPerson(props.lineageId, {
       relation: props.anchor ? relation.value : "root",
       anchorPersonId: props.anchor?.id,
-      otherParentId: relation.value === "child" && props.spouses.length ? otherParentId.value : undefined,
+      otherParentId: relation.value === "child" && spouses.value.length ? otherParentId.value : undefined,
       person: { name: name.value, gender: gender.value, birthDate: birthDate.value },
     });
     emit("added");

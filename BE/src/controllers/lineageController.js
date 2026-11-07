@@ -250,12 +250,30 @@ export const quickAddPerson = async (req, res) => {
     // be chosen from them (so each child is tied to one marriage).
     let otherParentId = null;
     if (relation === 'child' && mongoose.isValidObjectId(anchorPersonId)) {
-      const marriages = await Relationship.find({ lineageId: lineage._id, type: 'marriage', personIds: anchorPersonId }).lean();
-      const spouseIds = marriages.flatMap((marriage) => marriage.personIds.map(String)).filter((id) => id !== String(anchorPersonId));
-      if (spouseIds.length) {
+      // Spouses come from marriage records and from the person's older stored
+      // partner list — the same two sources the map's spouse drawer uses.
+      const [marriages, anchorPerson] = await Promise.all([
+        Relationship.find({ lineageId: lineage._id, type: 'marriage', personIds: anchorPersonId }).lean(),
+        Person.findById(anchorPersonId).select('partnerIds').lean()
+      ]);
+      const spouseIds = new Set(marriages.flatMap((marriage) => marriage.personIds.map(String)));
+      (anchorPerson?.partnerIds || []).forEach((id) => spouseIds.add(String(id)));
+      spouseIds.delete(String(anchorPersonId));
+      if (spouseIds.size) {
         const chosen = String(req.body.otherParentId || '');
         if (!chosen) return res.status(400).json({ message: 'Choose the child\'s other parent' });
-        if (!spouseIds.includes(chosen)) return res.status(400).json({ message: 'The other parent must be a spouse of this person' });
+        if (!spouseIds.has(chosen) || !mongoose.isValidObjectId(chosen)) {
+          return res.status(400).json({ message: 'The other parent must be a spouse of this person' });
+        }
+        const spouse = await Person.exists({ _id: chosen, isDeleted: false });
+        if (!spouse) return res.status(400).json({ message: 'That spouse could not be found' });
+        // A spouse known only from the older partner list isn't on this map
+        // yet: bring them in so the link and their badge can be shown.
+        const hasMember = await LineageMember.exists({ lineageId: lineage._id, personId: chosen });
+        if (!hasMember) await LineageMember.create({ lineageId: lineage._id, personId: chosen, modeOfJoining: 'married' });
+        if (!marriages.some((marriage) => marriage.personIds.map(String).includes(chosen))) {
+          await Relationship.create({ lineageId: lineage._id, type: 'marriage', personIds: [anchorPersonId, chosen] });
+        }
         otherParentId = chosen;
       }
     }

@@ -308,7 +308,8 @@
       :lineage-id="lineage.id"
       :anchor="quickAdd.anchor"
       :initial-relation="quickAdd.relation === 'root' ? 'child' : quickAdd.relation"
-      :spouses="spousesOf(quickAdd.anchor)"
+      :spouse-ids="quickAdd.anchor?.partnerIds || []"
+      :known-people="rawPeople"
       @close="quickAdd = null"
       @added="onQuickAdded"
     />
@@ -765,12 +766,6 @@ const connectPerson = (person) => {
         : "admin-lineages",
     query: { lineageId: lineage.value?.id, connectPersonId: person.id },
   });
-};
-// The people the anchor is married to, for the child's "other parent" choice.
-const spousesOf = (anchor) => {
-  if (!anchor) return [];
-  const ids = new Set(anchor.partnerIds || []);
-  return rawPeople.value.filter((person) => ids.has(person.id));
 };
 const openQuickAdd = ({ person, relation }) => {
   quickAdd.value = { anchor: person, relation };

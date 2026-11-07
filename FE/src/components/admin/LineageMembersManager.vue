@@ -347,6 +347,7 @@
 // lineage and APPROVING it stays in the two parent views — this component
 // only ever manages the content of whichever single lineage it's given.
 import { computed, onMounted, reactive, ref, watch } from "vue";
+import { resolvePeople } from "@/composables/resolvePeople";
 import { useRoute } from "vue-router";
 import { api } from "@/api";
 import SearchableSelect from "@/components/ui/SearchableSelect.vue";
@@ -395,22 +396,29 @@ const QUICK_OPTIONS = [
 const quick = reactive({ anchor: "", relation: "child", name: "", gender: "male", birthDate: "", otherParentId: "" });
 const quickSaving = ref(false);
 const quickMessage = ref("");
-// Spouses of whoever the new child is being added to.
-const quickSpouses = computed(() => {
-  const ids = new Set();
-  tree.value.relationships.forEach((relationship) => {
-    if (relationship.type === "marriage" && relationship.personIds.includes(quick.anchor)) {
-      relationship.personIds.forEach((id) => id !== quick.anchor && ids.add(id));
-    }
-  });
-  return tree.value.people.filter((person) => ids.has(person.id));
-});
-// One spouse is the obvious other parent; several means the user must pick.
+// Spouses of whoever the new child is being added to: marriage records plus
+// the person's older stored partner list, like the map's spouse drawer.
+const quickSpouses = ref([]);
 watch(
-  () => [quick.anchor, quickSpouses.value.length],
-  () => {
-    quick.otherParentId = quickSpouses.value.length === 1 ? quickSpouses.value[0].id : "";
+  () => [quick.anchor, quick.relation, tree.value],
+  async () => {
+    const anchor = quick.anchor;
+    if (!anchor || quick.relation !== "child") return (quickSpouses.value = []);
+    const ids = new Set(tree.value.people.find((person) => person.id === anchor)?.partnerIds || []);
+    tree.value.relationships.forEach((relationship) => {
+      if (relationship.type === "marriage" && relationship.personIds.includes(anchor)) {
+        relationship.personIds.forEach((id) => id !== anchor && ids.add(id));
+      }
+    });
+    const found = await resolvePeople([...ids], tree.value.people);
+    if (anchor !== quick.anchor) return;
+    quickSpouses.value = found;
+    // Keep a choice already made (so several siblings can be added in a row).
+    if (!found.some((spouse) => spouse.id === quick.otherParentId)) {
+      quick.otherParentId = found.length === 1 ? found[0].id : "";
+    }
   },
+  { immediate: true },
 );
 const quickLabel = computed(() => {
   if (!members.value.length) return "Add as root";
