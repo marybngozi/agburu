@@ -95,15 +95,26 @@ export function useLineage() {
       const branch = buildBranch(rootId);
       if (!branch) return;
       const root = hierarchy(branch, (entry) => entry.children);
-      // Same nodeSize as LineageMapView.vue's layout() — a taller row
-      // height than the card itself gives each branch's curve room to arc
-      // before reaching the next generation.
-      tree().nodeSize([320, 230])(root);
+      // The compact "Branches" layout from the main map: siblings sit close
+      // together and, in big families, alternate between two heights so the
+      // cards interleave like an upside-down tree instead of one wide row.
+      tree()
+        .nodeSize([300, 250])
+        .separation((a, b) => (a.parent === b.parent ? 0.5 : 1))(root);
+      const STAGGER = 125;
+      const offsets = new Map();
+      root.descendants().forEach((d3Node) => {
+        const parent = d3Node.parent;
+        if (!parent) return offsets.set(d3Node, 0);
+        const siblings = parent.children;
+        const stagger = siblings.length >= 3 ? (siblings.indexOf(d3Node) % 2) * STAGGER : 0;
+        offsets.set(d3Node, offsets.get(parent) + stagger);
+      });
       root.descendants().forEach((d3Node) => {
         placed.add(d3Node.data.node.id);
         positions.set(d3Node.data.node.id, {
           x: d3Node.x + forestOffset,
-          y: d3Node.y,
+          y: d3Node.y + offsets.get(d3Node),
         });
       });
       forestOffset += Math.max(...root.descendants().map((d3Node) => d3Node.x), 0) + 420;
